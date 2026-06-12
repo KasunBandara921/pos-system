@@ -167,7 +167,7 @@ export default function Shell({
           <div className="flex items-center gap-md flex-1">
             {/* Search Input conditional on callback */}
             {onSearchChange ? (
-              <div className="relative w-full max-w-md hidden sm:block">
+              <div className="relative w-full max-w-[448px] hidden sm:block">
                 <span className="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant">
                   search
                 </span>
@@ -192,7 +192,7 @@ export default function Shell({
                 )}
               </div>
             ) : (
-              <div className="w-full max-w-md hidden sm:block" />
+              <div className="w-full max-w-[448px] hidden sm:block" />
             )}
           </div>
 
