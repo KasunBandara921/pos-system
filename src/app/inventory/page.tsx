@@ -1,0 +1,379 @@
+"use client";
+
+import React, { useState, useMemo } from "react";
+import Shell from "../components/Shell";
+import ProductModal from "../components/ProductModal";
+import { MOCK_PRODUCTS } from "../mockData";
+import { Product } from "../types";
+
+export default function InventoryPage() {
+  // Inventory States
+  const [products, setProducts] = useState<Product[]>(MOCK_PRODUCTS);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedFilter, setSelectedFilter] = useState<"All" | "Out of Stock" | "Low Stock">("All");
+  const [selectedCategory, setSelectedCategory] = useState<string>("All Categories");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage] = useState<number>(5); // 5 items per page for interactive testing
+
+  // Add/Edit Modal States
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+
+  // Quick stats counts
+  const stats = useMemo(() => {
+    const outOfStock = products.filter((p) => p.stock === 0).length;
+    const lowStock = products.filter((p) => p.stock > 0 && p.stock <= 15).length;
+    return { outOfStock, lowStock, total: products.length };
+  }, [products]);
+
+  // Categories list derived from products dynamically
+  const uniqueCategories = useMemo(() => {
+    const cats = Array.from(new Set(products.map((p) => p.category)));
+    return ["All Categories", ...cats];
+  }, [products]);
+
+  // Filter products list based on search, dropdown category, and status filters
+  const filteredProducts = useMemo(() => {
+    return products.filter((p) => {
+      // 1. Search Query filter
+      const matchesSearch =
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.supplier.toLowerCase().includes(searchQuery.toLowerCase());
+
+      // 2. Dropdown Category filter
+      const matchesCategory =
+        selectedCategory === "All Categories" || p.category === selectedCategory;
+
+      // 3. Status Button filter
+      let matchesStatus = true;
+      if (selectedFilter === "Out of Stock") {
+        matchesStatus = p.stock === 0;
+      } else if (selectedFilter === "Low Stock") {
+        matchesStatus = p.stock > 0 && p.stock <= 15;
+      }
+
+      return matchesSearch && matchesCategory && matchesStatus;
+    });
+  }, [products, searchQuery, selectedCategory, selectedFilter]);
+
+  // Reset pagination to page 1 whenever filters or search query changes
+  useMemo(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory, selectedFilter]);
+
+  // Pagination calculation
+  const totalItems = filteredProducts.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+  const paginatedProducts = useMemo(() => {
+    const startIdx = (currentPage - 1) * itemsPerPage;
+    return filteredProducts.slice(startIdx, startIdx + itemsPerPage);
+  }, [filteredProducts, currentPage, itemsPerPage]);
+
+  const showingStart = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+  const showingEnd = Math.min(currentPage * itemsPerPage, totalItems);
+
+  // Handlers
+  const handleOpenAdd = () => {
+    setEditingProduct(null);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = (product: Product) => {
+    setEditingProduct(product);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteProduct = (productId: string, productName: string) => {
+    if (confirm(`Are you sure you want to delete "${productName}" from inventory?`)) {
+      setProducts((prev) => prev.filter((p) => p.id !== productId));
+    }
+  };
+
+  const handleSaveProduct = (product: Product) => {
+    setIsModalOpen(false);
+    if (editingProduct) {
+      // Edit mode: replace existing
+      setProducts((prev) => prev.map((p) => (p.id === product.id ? product : p)));
+    } else {
+      // Add mode: append to start of catalog
+      setProducts((prev) => [product, ...prev]);
+    }
+  };
+
+  return (
+    <Shell searchQuery={searchQuery} onSearchChange={setSearchQuery}>
+      <main className="flex-1 p-lg overflow-y-auto bg-background flex flex-col gap-lg">
+        {/* Page Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-md">
+          <div>
+            <h2 className="font-headline-lg text-headline-lg text-on-surface">Inventory Management</h2>
+            <p className="font-body-md text-body-md text-on-surface-variant mt-1">
+              Manage your product catalog and track stock levels across Terminal #01.
+            </p>
+          </div>
+          <button
+            onClick={handleOpenAdd}
+            className="bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md py-sm px-md rounded-lg flex items-center gap-xs transition-colors shadow-sm active:scale-95 whitespace-nowrap min-h-[44px]"
+          >
+            <span className="material-symbols-outlined">add</span>
+            Add Product
+          </button>
+        </div>
+
+        {/* Controls & Filters Bar */}
+        <div className="bg-surface border border-outline-variant rounded-xl p-sm flex flex-col lg:flex-row gap-md justify-between items-center shadow-sm">
+          {/* Filters buttons */}
+          <div className="flex items-center gap-sm overflow-x-auto pb-2 lg:pb-0 w-full lg:w-auto no-scrollbar">
+            <button
+              onClick={() => setSelectedFilter("All")}
+              className={`px-md py-xs rounded-full font-label-md text-label-md whitespace-nowrap transition-colors border ${
+                selectedFilter === "All"
+                  ? "bg-primary-container border-primary text-on-primary-container font-bold"
+                  : "border-outline-variant text-on-surface-variant hover:bg-surface-container-low"
+              } min-h-[38px]`}
+            >
+              All Items ({stats.total})
+            </button>
+            <button
+              onClick={() => setSelectedFilter("Out of Stock")}
+              className={`px-md py-xs rounded-full font-label-md text-label-md whitespace-nowrap transition-colors border flex items-center gap-1.5 ${
+                selectedFilter === "Out of Stock"
+                  ? "bg-red-50 border-red-500 text-red-700 font-bold"
+                  : "border-outline-variant text-on-surface-variant hover:bg-surface-container-low"
+              } min-h-[38px]`}
+            >
+              <span className="w-2 h-2 rounded-full bg-error"></span>
+              Out of Stock ({stats.outOfStock})
+            </button>
+            <button
+              onClick={() => setSelectedFilter("Low Stock")}
+              className={`px-md py-xs rounded-full font-label-md text-label-md whitespace-nowrap transition-colors border flex items-center gap-1.5 ${
+                selectedFilter === "Low Stock"
+                  ? "bg-amber-50 border-amber-500 text-amber-700 font-bold"
+                  : "border-outline-variant text-on-surface-variant hover:bg-surface-container-low"
+              } min-h-[38px]`}
+            >
+              <span className="w-2 h-2 rounded-full bg-secondary"></span>
+              Low Stock ({stats.lowStock})
+            </button>
+          </div>
+
+          {/* Sort & Category Dropdown */}
+          <div className="flex items-center gap-sm w-full lg:w-auto">
+            <div className="relative w-full lg:w-48">
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full appearance-none bg-surface-container-lowest border border-outline-variant text-on-surface font-body-md text-body-md py-xs pl-sm pr-xl rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary min-h-[38px]"
+              >
+                {uniqueCategories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+              <span className="material-symbols-outlined absolute right-sm top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">
+                arrow_drop_down
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Data Table Container */}
+        <div className="bg-surface border border-outline-variant rounded-xl shadow-sm overflow-hidden flex flex-col">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-[800px]">
+              <thead className="bg-surface-container-low border-b border-outline-variant font-label-md text-label-md text-on-surface-variant">
+                <tr>
+                  <th className="p-md font-semibold">Product Details</th>
+                  <th className="p-md font-semibold">SKU</th>
+                  <th className="p-md font-semibold">Category</th>
+                  <th className="p-md font-semibold text-right">Price</th>
+                  <th className="p-md font-semibold text-right">Quantity</th>
+                  <th className="p-md font-semibold text-center">Status</th>
+                  <th className="p-md font-semibold text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="font-body-md text-body-md text-on-surface">
+                {paginatedProducts.length > 0 ? (
+                  paginatedProducts.map((product) => {
+                    // Determine stock status variables
+                    const isOutOfStock = product.stock === 0;
+                    const isLowStock = product.stock > 0 && product.stock <= 15;
+
+                    return (
+                      <tr
+                        key={product.id}
+                        className={`border-b border-outline-variant hover:bg-surface-container-low transition-colors even:bg-surface-container-lowest odd:bg-surface ${
+                          isOutOfStock ? "bg-red-50/10" : ""
+                        }`}
+                      >
+                        {/* Product details */}
+                        <td className="p-md">
+                          <div className="flex items-center gap-sm">
+                            <div className="w-12 h-12 bg-surface-container rounded border border-outline-variant overflow-hidden flex-shrink-0 flex items-center justify-center">
+                              {product.image ? (
+                                <img
+                                  alt={product.name}
+                                  className={`w-full h-full object-cover ${
+                                    isOutOfStock ? "grayscale opacity-70" : ""
+                                  }`}
+                                  src={product.image}
+                                />
+                              ) : (
+                                <span className="material-symbols-outlined text-outline-variant text-[28px]">
+                                  {product.icon || "image"}
+                                </span>
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-label-md text-label-md text-on-surface font-semibold">
+                                {product.name}
+                              </p>
+                              <p className="font-label-sm text-label-sm text-on-surface-variant">
+                                Supplier: {product.supplier}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* SKU */}
+                        <td className="p-md font-mono-data text-mono-data text-on-surface-variant">
+                          {product.sku}
+                        </td>
+
+                        {/* Category */}
+                        <td className="p-md">{product.category}</td>
+
+                        {/* Price */}
+                        <td className="p-md text-right font-semibold">
+                          ${product.price.toFixed(2)}
+                        </td>
+
+                        {/* Quantity (Stock) */}
+                        <td className="p-md text-right font-mono-data">
+                          <span
+                            className={
+                              isOutOfStock
+                                ? "text-error font-bold"
+                                : isLowStock
+                                ? "text-secondary font-bold"
+                                : ""
+                            }
+                          >
+                            {product.stock}
+                          </span>
+                        </td>
+
+                        {/* Status Badge */}
+                        <td className="p-md text-center">
+                          {isOutOfStock ? (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm font-bold">
+                              Out of Stock
+                            </span>
+                          ) : isLowStock ? (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full border border-secondary text-secondary font-label-sm text-label-sm font-semibold">
+                              Low Stock
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full bg-primary-container/20 text-primary font-label-sm text-label-sm">
+                              In Stock
+                            </span>
+                          )}
+                        </td>
+
+                        {/* Actions */}
+                        <td className="p-md text-center">
+                          <div className="flex items-center justify-center gap-xs">
+                            <button
+                              onClick={() => handleOpenEdit(product)}
+                              className="p-xs text-on-surface-variant hover:text-primary transition-colors rounded-full hover:bg-surface-container-high"
+                              title="Edit"
+                            >
+                              <span className="material-symbols-outlined text-[20px]">edit</span>
+                            </button>
+                            <button
+                              onClick={() => handleDeleteProduct(product.id, product.name)}
+                              className="p-xs text-on-surface-variant hover:text-error transition-colors rounded-full hover:bg-surface-container-high"
+                              title="Delete"
+                            >
+                              <span className="material-symbols-outlined text-[20px]">delete</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={7} className="p-xl text-center text-on-surface-variant">
+                      <div className="flex flex-col items-center justify-center gap-xs">
+                        <span className="material-symbols-outlined text-4xl">search_off</span>
+                        <p className="font-label-md text-label-md">No products found matching filters.</p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination Footer */}
+          <div className="bg-surface-container-lowest border-t border-outline-variant p-sm flex items-center justify-between">
+            <p className="font-label-sm text-label-sm text-on-surface-variant">
+              Showing {showingStart} to {showingEnd} of {totalItems} products
+            </p>
+            {totalPages > 1 && (
+              <div className="flex items-center gap-xs">
+                {/* Previous Button */}
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="p-xs rounded text-on-surface-variant hover:bg-surface-container-low transition-colors disabled:opacity-50 min-w-[36px] min-h-[36px] flex items-center justify-center"
+                >
+                  <span className="material-symbols-outlined text-[20px]">chevron_left</span>
+                </button>
+
+                {/* Page Numbers */}
+                {Array.from({ length: totalPages }).map((_, index) => {
+                  const pNum = index + 1;
+                  return (
+                    <button
+                      key={pNum}
+                      onClick={() => setCurrentPage(pNum)}
+                      className={`p-xs rounded font-label-sm min-w-[36px] min-h-[36px] flex items-center justify-center transition-colors ${
+                        currentPage === pNum
+                          ? "text-on-surface hover:bg-surface-container-low font-semibold bg-surface-container"
+                          : "text-on-surface-variant hover:bg-surface-container-low"
+                      }`}
+                    >
+                      {pNum}
+                    </button>
+                  );
+                })}
+
+                {/* Next Button */}
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="p-xs rounded text-on-surface-variant hover:bg-surface-container-low transition-colors disabled:opacity-50 min-w-[36px] min-h-[36px] flex items-center justify-center"
+                >
+                  <span className="material-symbols-outlined text-[20px]">chevron_right</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
+
+      {/* Add / Edit product modal */}
+      <ProductModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        product={editingProduct}
+        onSave={handleSaveProduct}
+      />
+    </Shell>
+  );
+}
