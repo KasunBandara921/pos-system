@@ -95,7 +95,7 @@ export default function Shell({
             </li>
             <li>
               <Link
-                href="#"
+                href="/reports"
                 className={`flex items-center gap-sm px-md py-sm rounded-lg transition-colors duration-200 min-h-[44px] ${
                   pathname === "/reports"
                     ? "text-primary dark:text-primary-fixed-dim font-bold border-r-4 border-primary bg-surface-container-high"
