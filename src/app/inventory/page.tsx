@@ -1,15 +1,31 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Shell from "../components/Shell";
 import ProductModal from "../components/ProductModal";
 import { MOCK_PRODUCTS } from "../mockData";
 import { Product } from "../types";
+import { getProducts, createProduct } from "../actions/products";
 
 export default function InventoryPage() {
   // Inventory States
-  const [products, setProducts] = useState<Product[]>(MOCK_PRODUCTS);
+  const [products, setProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    async function fetchInventory() {
+      try {
+        const data = await getProducts();
+        setProducts(data);
+      } catch (error) {
+        console.error("Failed to load inventory:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchInventory();
+  }, []);
   const [selectedFilter, setSelectedFilter] = useState<"All" | "Out of Stock" | "Low Stock">("All");
   const [selectedCategory, setSelectedCategory] = useState<string>("All Categories");
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -90,14 +106,22 @@ export default function InventoryPage() {
     }
   };
 
-  const handleSaveProduct = (product: Product) => {
+  const handleSaveProduct = async (productData: Product) => {
     setIsModalOpen(false);
     if (editingProduct) {
       // Edit mode: replace existing
-      setProducts((prev) => prev.map((p) => (p.id === product.id ? product : p)));
+      setProducts((prev) => prev.map((p) => (p.id === productData.id ? productData : p)));
     } else {
-      // Add mode: append to start of catalog
-      setProducts((prev) => [product, ...prev]);
+      // Add mode: save to database
+      try {
+        const { id, ...newProductFields } = productData;
+        const savedProduct = await createProduct(newProductFields);
+        setProducts((prev) => [savedProduct, ...prev]);
+      } catch (error) {
+        console.error("Failed to save product:", error);
+        alert("Failed to add product to database. It has been added locally for session testing.");
+        setProducts((prev) => [productData, ...prev]);
+      }
     }
   };
 
@@ -196,7 +220,16 @@ export default function InventoryPage() {
                 </tr>
               </thead>
               <tbody className="font-body-md text-body-md text-on-surface">
-                {paginatedProducts.length > 0 ? (
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={7} className="p-xl text-center text-on-surface-variant">
+                      <div className="flex flex-col items-center justify-center gap-xs">
+                        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                        <p className="font-label-md text-label-md mt-sm">Loading product catalog...</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : paginatedProducts.length > 0 ? (
                   paginatedProducts.map((product) => {
                     // Determine stock status variables
                     const isOutOfStock = product.stock === 0;
