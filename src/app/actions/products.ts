@@ -139,3 +139,44 @@ export async function deleteProduct(id: string): Promise<boolean> {
     throw new Error("Failed to delete product from database.");
   }
 }
+
+export async function bulkDeductStock(items: { productId: string; quantity: number }[]): Promise<boolean> {
+  try {
+    // 1. Find all products that exist in the database with these IDs
+    const existingProducts = await db.product.findMany({
+      where: {
+        id: {
+          in: items.map((item) => item.productId),
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    const existingIds = new Set(existingProducts.map((p) => p.id));
+
+    // 2. Only update the products that actually exist in the DB
+    const updates = items
+      .filter((item) => existingIds.has(item.productId))
+      .map((item) =>
+        db.product.update({
+          where: { id: item.productId },
+          data: {
+            stock: {
+              decrement: item.quantity,
+            },
+          },
+        })
+      );
+
+    if (updates.length > 0) {
+      await db.$transaction(updates);
+    }
+    return true;
+  } catch (error) {
+    console.error("Failed to deduct stock in database:", error);
+    throw new Error("Failed to update inventory stock in database.");
+  }
+}
+
