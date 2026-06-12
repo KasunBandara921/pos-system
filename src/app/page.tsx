@@ -6,7 +6,7 @@ import { MOCK_PRODUCTS, CATEGORIES } from "./mockData";
 import { Product, CartItem } from "./types";
 import PaymentModal from "./components/PaymentModal";
 import Shell from "./components/Shell";
-import { getProducts } from "./actions/products";
+import { getProducts, bulkDeductStock } from "./actions/products";
 import { jsPDF } from "jspdf";
 
 interface ReceiptData {
@@ -315,8 +315,14 @@ export default function CheckoutPage() {
     setCompletedReceipt(null);
   };
 
-  const handlePaymentComplete = (paymentMethod: string, amountTendered: number) => {
+  const handlePaymentComplete = async (paymentMethod: string, amountTendered: number) => {
     setIsPaymentModalOpen(false);
+
+    // Prepare items to deduct
+    const itemsToDeduct = cart.map((item) => ({
+      productId: item.product.id,
+      quantity: item.quantity,
+    }));
 
     // Deduct stock in our products state
     setProducts((prevProducts) => {
@@ -328,6 +334,13 @@ export default function CheckoutPage() {
         return p;
       });
     });
+
+    try {
+      await bulkDeductStock(itemsToDeduct);
+    } catch (error) {
+      console.error("Failed to persist stock deduction:", error);
+      alert("Failed to update inventory stock in database, but order completed locally.");
+    }
 
     const orderId = `LWD-${Math.floor(100000 + Math.random() * 900000)}`;
     const changeDue = paymentMethod === "Cash" ? Math.max(0, amountTendered - total) : 0;
@@ -467,52 +480,57 @@ export default function CheckoutPage() {
                   <p className="font-label-md text-label-md mt-sm">Loading product catalog...</p>
                 </div>
               ) : filteredProducts.length > 0 ? (
-                filteredProducts.map((product) => (
-                  <div
-                    key={product.id}
-                    onClick={() => handleAddToCart(product)}
-                    className="bg-surface rounded-lg border border-outline-variant overflow-hidden hover:shadow-md transition-all cursor-pointer active:scale-95 group flex flex-col justify-between"
-                  >
-                    {/* Image container */}
-                    <div className="aspect-square bg-surface-container relative flex items-center justify-center overflow-hidden">
-                      {product.image ? (
-                        <img
-                          alt={product.name}
-                          className="w-full h-full object-cover mix-blend-multiply opacity-90 group-hover:opacity-100 transition-opacity"
-                          src={product.image}
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-tertiary-fixed to-surface-container rounded-md flex items-center justify-center border border-outline-variant/30 p-md">
-                          <span className="material-symbols-outlined text-4xl text-tertiary">
-                            {product.icon || "shopping_bag"}
-                          </span>
-                        </div>
-                      )}
-                      <div className={`absolute top-xs right-xs px-2 py-1 rounded text-xs font-mono-data font-medium border ${
-                        product.stock > 10 
-                          ? "bg-surface-container-highest text-on-surface-variant border-outline-variant"
-                          : product.stock > 0 
-                            ? "bg-warning-container text-on-warning-container border-amber-300 bg-amber-50"
-                            : "bg-error-container text-on-error-container border-red-300 bg-red-50 text-error"
-                      }`}>
-                        {product.stock > 0 ? `${product.stock} In Stock` : "Out of Stock"}
-                      </div>
-                    </div>
+                filteredProducts.map((product) => {
+                  const cartItem = cart.find((item) => item.product.id === product.id);
+                  const availableStock = product.stock - (cartItem ? cartItem.quantity : 0);
 
-                    {/* Info container */}
-                    <div className="p-sm">
-                      <h3 className="font-label-md text-label-md text-on-surface truncate">
-                        {product.name}
-                      </h3>
-                      <div className="mt-1 flex items-baseline justify-between">
-                        <span className="font-headline-md text-headline-md text-primary font-bold">
-                          ${product.price.toFixed(2)}
-                        </span>
-                        <span className="text-xs text-on-surface-variant">{product.unit}</span>
+                  return (
+                    <div
+                      key={product.id}
+                      onClick={() => handleAddToCart(product)}
+                      className="bg-surface rounded-lg border border-outline-variant overflow-hidden hover:shadow-md transition-all cursor-pointer active:scale-95 group flex flex-col justify-between"
+                    >
+                      {/* Image container */}
+                      <div className="aspect-square bg-surface-container relative flex items-center justify-center overflow-hidden">
+                        {product.image ? (
+                          <img
+                            alt={product.name}
+                            className="w-full h-full object-cover mix-blend-multiply opacity-90 group-hover:opacity-100 transition-opacity"
+                            src={product.image}
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-tertiary-fixed to-surface-container rounded-md flex items-center justify-center border border-outline-variant/30 p-md">
+                            <span className="material-symbols-outlined text-4xl text-tertiary">
+                              {product.icon || "shopping_bag"}
+                            </span>
+                          </div>
+                        )}
+                        <div className={`absolute top-xs right-xs px-2 py-1 rounded text-xs font-mono-data font-medium border ${
+                          availableStock > 10 
+                            ? "bg-surface-container-highest text-on-surface-variant border-outline-variant"
+                            : availableStock > 0 
+                              ? "bg-warning-container text-on-warning-container border-amber-300 bg-amber-50"
+                              : "bg-error-container text-on-error-container border-red-300 bg-red-50 text-error"
+                        }`}>
+                          {availableStock > 0 ? `${availableStock} In Stock` : "Out of Stock"}
+                        </div>
+                      </div>
+
+                      {/* Info container */}
+                      <div className="p-sm">
+                        <h3 className="font-label-md text-label-md text-on-surface truncate">
+                          {product.name}
+                        </h3>
+                        <div className="mt-1 flex items-baseline justify-between">
+                          <span className="font-headline-md text-headline-md text-primary font-bold">
+                            ${product.price.toFixed(2)}
+                          </span>
+                          <span className="text-xs text-on-surface-variant">{product.unit}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="col-span-full py-xl text-center text-on-surface-variant flex flex-col items-center justify-center gap-xs">
                   <span className="material-symbols-outlined text-4xl">search_off</span>
