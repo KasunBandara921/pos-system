@@ -90,3 +90,52 @@ export async function createProduct(productData: Omit<Product, "id">): Promise<P
     throw new Error("Failed to add product to database.");
   }
 }
+
+export async function updateProduct(id: string, productData: Omit<Product, "id">): Promise<Product> {
+  try {
+    const product = await db.product.update({
+      where: { id },
+      data: {
+        name: productData.name,
+        price: Number(productData.price),
+        unit: productData.unit,
+        category: productData.category,
+        stock: Number(productData.stock),
+        image: productData.image || null,
+        altText: productData.altText || null,
+        icon: productData.icon || null,
+        sku: productData.sku,
+        supplier: productData.supplier,
+      },
+    });
+
+    return {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      unit: product.unit,
+      category: product.category,
+      stock: product.stock,
+      image: product.image ?? undefined,
+      altText: product.altText ?? undefined,
+      icon: product.icon ?? undefined,
+      sku: product.sku,
+      supplier: product.supplier,
+    };
+  } catch (error) {
+    console.error("Failed to update product:", error);
+    throw new Error("Failed to update product in database.");
+  }
+}
+
+export async function deleteProduct(id: string): Promise<boolean> {
+  try {
+    await db.product.delete({
+      where: { id },
+    });
+    return true;
+  } catch (error) {
+    console.error("Failed to delete product:", error);
+    throw new Error("Failed to delete product from database.");
+  }
+}

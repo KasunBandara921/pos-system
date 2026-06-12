@@ -5,7 +5,7 @@ import Shell from "../components/Shell";
 import ProductModal from "../components/ProductModal";
 import { MOCK_PRODUCTS } from "../mockData";
 import { Product } from "../types";
-import { getProducts, createProduct } from "../actions/products";
+import { getProducts, createProduct, updateProduct, deleteProduct } from "../actions/products";
 
 export default function InventoryPage() {
   // Inventory States
@@ -100,17 +100,32 @@ export default function InventoryPage() {
     setIsModalOpen(true);
   };
 
-  const handleDeleteProduct = (productId: string, productName: string) => {
+  const handleDeleteProduct = async (productId: string, productName: string) => {
     if (confirm(`Are you sure you want to delete "${productName}" from inventory?`)) {
-      setProducts((prev) => prev.filter((p) => p.id !== productId));
+      try {
+        await deleteProduct(productId);
+        setProducts((prev) => prev.filter((p) => p.id !== productId));
+      } catch (error) {
+        console.error("Failed to delete product:", error);
+        alert("Failed to delete product from database. Removing locally for session testing.");
+        setProducts((prev) => prev.filter((p) => p.id !== productId));
+      }
     }
   };
 
   const handleSaveProduct = async (productData: Product) => {
     setIsModalOpen(false);
     if (editingProduct) {
-      // Edit mode: replace existing
-      setProducts((prev) => prev.map((p) => (p.id === productData.id ? productData : p)));
+      // Edit mode: save to database
+      try {
+        const { id, ...updatedFields } = productData;
+        const updatedProduct = await updateProduct(productData.id, updatedFields);
+        setProducts((prev) => prev.map((p) => (p.id === updatedProduct.id ? updatedProduct : p)));
+      } catch (error) {
+        console.error("Failed to update product:", error);
+        alert("Failed to update product in database. Updating locally for session testing.");
+        setProducts((prev) => prev.map((p) => (p.id === productData.id ? productData : p)));
+      }
     } else {
       // Add mode: save to database
       try {
