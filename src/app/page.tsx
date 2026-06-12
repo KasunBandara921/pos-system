@@ -1,15 +1,31 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import { MOCK_PRODUCTS, CATEGORIES } from "./mockData";
 import { Product, CartItem } from "./types";
 import PaymentModal from "./components/PaymentModal";
 import Shell from "./components/Shell";
+import { getProducts } from "./actions/products";
 
 export default function CheckoutPage() {
   // Application State
-  const [products, setProducts] = useState<Product[]>(MOCK_PRODUCTS);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        const data = await getProducts();
+        setProducts(data);
+      } catch (error) {
+        console.error("Failed to load checkout products:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadProducts();
+  }, []);
   const [cart, setCart] = useState<CartItem[]>([
     // Initialize with the mock cart items from the user's template
     {
@@ -200,7 +216,7 @@ export default function CheckoutPage() {
       {completedReceipt ? (
         /* Checkout Completion Receipt Success Screen */
         <main className="flex-1 overflow-y-auto flex items-center justify-center p-lg">
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-xl w-full max-w-md p-lg animate-fade-in text-center flex flex-col gap-md">
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-xl w-full max-w-[448px] p-lg animate-fade-in text-center flex flex-col gap-md">
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary mx-auto">
               <span className="material-symbols-outlined text-4xl">check_circle</span>
             </div>
@@ -302,7 +318,12 @@ export default function CheckoutPage() {
 
             {/* Products Grid */}
             <div className="flex-1 overflow-y-auto p-md grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-md content-start">
-              {filteredProducts.length > 0 ? (
+              {isLoading ? (
+                <div className="col-span-full py-xl text-center text-on-surface-variant flex flex-col items-center justify-center gap-xs">
+                  <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                  <p className="font-label-md text-label-md mt-sm">Loading product catalog...</p>
+                </div>
+              ) : filteredProducts.length > 0 ? (
                 filteredProducts.map((product) => (
                   <div
                     key={product.id}

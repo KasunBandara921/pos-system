@@ -59,8 +59,8 @@ export default function PaymentModal({
     paymentMethod === "Cash" && (parseFloat(cashTendered) || 0) < totalAmount;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in p-sm">
-      <div className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-sm">
+      <div className="bg-surface-container-lowest bg-white dark:bg-[#1e293b] border border-outline-variant rounded-xl shadow-xl w-full max-w-[512px] max-h-[90vh] overflow-hidden flex flex-col">
         {/* Modal Header */}
         <div className="px-lg py-md border-b border-outline-variant bg-surface flex justify-between items-center">
           <div className="flex items-center gap-sm">
