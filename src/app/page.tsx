@@ -1,5 +1,5 @@
 "use client";
-
+ 
 import React, { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import { MOCK_PRODUCTS, CATEGORIES } from "./mockData";
@@ -7,6 +7,149 @@ import { Product, CartItem } from "./types";
 import PaymentModal from "./components/PaymentModal";
 import Shell from "./components/Shell";
 import { getProducts } from "./actions/products";
+import { jsPDF } from "jspdf";
+
+interface ReceiptData {
+  orderId: string;
+  items: CartItem[];
+  subtotal: number;
+  tax: number;
+  total: number;
+  paymentMethod: string;
+  amountTendered: number;
+  changeDue: number;
+  timestamp: string;
+}
+
+const downloadPDFReceipt = (receipt: ReceiptData | null) => {
+  if (!receipt) return;
+  const itemsCount = receipt.items.length;
+  // Calculate dynamic page height (in mm) based on items count
+  const pageHeight = 115 + itemsCount * 6;
+  const doc = new jsPDF({
+    unit: "mm",
+    format: [80, Math.max(120, pageHeight)]
+  });
+
+  const xCenter = 40;
+  let y = 10;
+
+  // Title: LEWDENIYA STORES
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.text("LEWDENIYA STORES", xCenter, y, { align: "center" });
+  y += 5;
+
+  // Subtitle
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.text("Terminal #01", xCenter, y, { align: "center" });
+  y += 4;
+
+  // Divider
+  doc.setDrawColor(200, 200, 200);
+  doc.setLineWidth(0.2);
+  doc.line(5, y, 75, y);
+  y += 4;
+
+  // Order Details
+  doc.setFontSize(7.5);
+  doc.text(`Order ID: ${receipt.orderId}`, 5, y);
+  y += 3.5;
+  doc.text(`Time: ${receipt.timestamp}`, 5, y);
+  y += 4;
+
+  // Divider
+  doc.line(5, y, 75, y);
+  y += 4.5;
+
+  // Items Header
+  doc.setFont("helvetica", "bold");
+  doc.text("Item", 5, y);
+  doc.text("Qty", 45, y, { align: "right" });
+  doc.text("Price", 58, y, { align: "right" });
+  doc.text("Total", 75, y, { align: "right" });
+  y += 3.5;
+
+  // Divider (thin)
+  doc.setLineWidth(0.1);
+  doc.line(5, y, 75, y);
+  y += 4;
+
+  // Reset font for items list
+  doc.setFont("helvetica", "normal");
+  receipt.items.forEach((item) => {
+    let name = item.product.name;
+    if (name.length > 20) {
+      name = name.substring(0, 18) + "...";
+    }
+    doc.text(name, 5, y);
+    doc.text(`${item.quantity}`, 45, y, { align: "right" });
+    doc.text(`$${item.product.price.toFixed(2)}`, 58, y, { align: "right" });
+    doc.text(`$${(item.product.price * item.quantity).toFixed(2)}`, 75, y, { align: "right" });
+    y += 5.5;
+  });
+
+  // Divider
+  doc.setLineWidth(0.2);
+  doc.line(5, y, 75, y);
+  y += 4.5;
+
+  // Totals
+  doc.text("Subtotal:", 45, y, { align: "right" });
+  doc.text(`$${receipt.subtotal.toFixed(2)}`, 75, y, { align: "right" });
+  y += 3.5;
+
+  doc.text("Tax (8.5%):", 45, y, { align: "right" });
+  doc.text(`$${receipt.tax.toFixed(2)}`, 75, y, { align: "right" });
+  y += 4.5;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.text("Total Amount:", 45, y, { align: "right" });
+  doc.text(`$${receipt.total.toFixed(2)}`, 75, y, { align: "right" });
+  y += 5.5;
+
+  // Divider
+  doc.setLineWidth(0.1);
+  doc.line(5, y, 75, y);
+  y += 4.5;
+
+  // Payment Details
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  doc.text("Payment Method:", 5, y);
+  doc.text(receipt.paymentMethod, 75, y, { align: "right" });
+  y += 3.5;
+
+  if (receipt.paymentMethod === "Cash") {
+    doc.text("Amount Tendered:", 5, y);
+    doc.text(`$${receipt.amountTendered.toFixed(2)}`, 75, y, { align: "right" });
+    y += 3.5;
+
+    doc.setFont("helvetica", "bold");
+    doc.text("Change Returned:", 5, y);
+    doc.text(`$${receipt.changeDue.toFixed(2)}`, 75, y, { align: "right" });
+    y += 4.5;
+  }
+
+  // Divider
+  doc.setLineWidth(0.2);
+  doc.line(5, y, 75, y);
+  y += 5;
+
+  // Thank you note
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(8);
+  doc.text("Thank you for shopping with us!", xCenter, y, { align: "center" });
+  y += 3.5;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(6.5);
+  doc.text("Please keep this receipt for your reference.", xCenter, y, { align: "center" });
+
+  // Save the PDF
+  doc.save(`receipt-${receipt.orderId}.pdf`);
+};
 
 export default function CheckoutPage() {
   // Application State
@@ -276,11 +419,11 @@ export default function CheckoutPage() {
             {/* Receipt Footer Actions */}
             <div className="flex gap-sm">
               <button
-                onClick={() => window.print()}
+                onClick={() => downloadPDFReceipt(completedReceipt)}
                 className="flex-1 bg-surface border border-outline-variant text-on-surface hover:bg-surface-container-low font-label-md text-label-md py-sm rounded-lg flex items-center justify-center gap-xs min-h-[44px]"
               >
-                <span className="material-symbols-outlined text-sm">print</span>
-                Print
+                <span className="material-symbols-outlined text-sm">download</span>
+                Download PDF
               </button>
               <button
                 onClick={handleNewSale}
