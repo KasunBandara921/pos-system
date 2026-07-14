@@ -73,95 +73,97 @@ export default function TransactionsPage() {
 
   return (
     <Shell>
-      <main className="flex-1 p-lg overflow-y-auto bg-background flex flex-col gap-lg animate-fade-in animate-rise-in">
-        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-md card-elevated p-lg">
-          <div className="space-y-1">
-            <h2 className="font-headline-lg text-headline-lg text-on-surface font-extrabold">{t("transactionsTitle")}</h2>
-            <p className="font-body-md text-body-md text-on-surface-variant">
-              {t("transactionsSubtitle")}
-            </p>
-          </div>
-          <Link
-            href="/"
-            className="btn-primary font-label-md py-sm px-md rounded-2xl flex items-center justify-center gap-xs active:scale-[0.97] min-h-11"
-          >
-            <span className="material-symbols-outlined text-[18px]">point_of_sale</span>
-            {t("newSale")}
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-md">
-          <div className="card-elevated p-lg hover:-translate-y-0.5 transition-transform duration-300">
-            <p className="font-label-md text-label-md text-on-surface-variant mb-2">{t("totalRevenue")}</p>
-            <h3 className="font-display-price text-display-price text-on-surface">{formatCurrency(totalRevenue)}</h3>
-          </div>
-          <div className="card-elevated p-lg hover:-translate-y-0.5 transition-transform duration-300">
-            <p className="font-label-md text-label-md text-on-surface-variant mb-2">{t("totalOrders")}</p>
-            <h3 className="font-display-price text-display-price text-on-surface">{totalOrders}</h3>
-          </div>
-          <div className="card-elevated p-lg hover:-translate-y-0.5 transition-transform duration-300">
-            <p className="font-label-md text-label-md text-on-surface-variant mb-2">{t("averageOrder")}</p>
-            <h3 className="font-display-price text-display-price text-on-surface">{formatCurrency(averageOrder)}</h3>
-          </div>
-          <div className="card-elevated p-lg hover:-translate-y-0.5 transition-transform duration-300">
-            <p className="font-label-md text-label-md text-on-surface-variant mb-2">{t("cashPayments")}</p>
-            <h3 className="font-display-price text-display-price text-on-surface">{cashOrders}</h3>
-          </div>
-        </div>
-
-        <section className="card-elevated overflow-hidden animate-fade-in animate-rise-in">
-          <div className="px-lg py-md border-b border-outline-variant/60 bg-linear-to-r from-primary/5 to-transparent flex flex-col sm:flex-row sm:items-center sm:justify-between gap-sm">
-            <div>
-              <h3 className="font-headline-md text-headline-md text-on-surface font-extrabold">{t("salesHistory")}</h3>
-              <p className="font-label-sm text-label-sm text-on-surface-variant">
-                {t("latestTransactions")}
+      <main className="flex-1 p-lg overflow-y-auto bg-background">
+        <div className="flex flex-col gap-lg animate-fade-in animate-rise-in">
+          <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-md card-elevated p-lg">
+            <div className="space-y-1">
+              <h2 className="font-headline-lg text-headline-lg text-on-surface font-extrabold">{t("transactionsTitle")}</h2>
+              <p className="font-body-md text-body-md text-on-surface-variant">
+                {t("transactionsSubtitle")}
               </p>
             </div>
-            <span className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm border border-primary/20">
-              {totalOrders} {t("savedSales")}
-            </span>
+            <Link
+              href="/"
+              className="btn-primary font-label-md py-sm px-md rounded-2xl flex items-center justify-center gap-xs active:scale-[0.97] min-h-11"
+            >
+              <span className="material-symbols-outlined text-[18px]">point_of_sale</span>
+              {t("newSale")}
+            </Link>
           </div>
 
-          {transactions.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse min-w-240">
-                <thead className="bg-surface-container-low border-b border-outline-variant font-label-md text-label-md text-on-surface-variant">
-                  <tr>
-                    <th className="p-md font-semibold">{t("colOrder")}</th>
-                    <th className="p-md font-semibold">{t("colTime")}</th>
-                    <th className="p-md font-semibold text-right">{t("colItems")}</th>
-                    <th className="p-md font-semibold">{t("colPayment")}</th>
-                    <th className="p-md font-semibold text-right">{t("colSubtotal")}</th>
-                    <th className="p-md font-semibold text-right">{t("colTax")}</th>
-                    <th className="p-md font-semibold text-right">{t("colTotal")}</th>
-                    <th className="p-md font-semibold text-right">{t("colChange")}</th>
-                  </tr>
-                </thead>
-                <tbody className="font-body-md text-body-md text-on-surface">
-                  {transactions.map((transaction) => (
-                    <TransactionRow key={transaction.id} transaction={transaction} formatDateTime={formatDateTime} />
-                  ))}
-                </tbody>
-              </table>
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-md">
+            <div className="card-elevated p-lg hover:-translate-y-0.5 transition-transform duration-300">
+              <p className="font-label-md text-label-md text-on-surface-variant mb-2">{t("totalRevenue")}</p>
+              <h3 className="font-display-price text-display-price text-on-surface">{formatCurrency(totalRevenue)}</h3>
             </div>
-          ) : (
-            <div className="p-xl text-center flex flex-col items-center justify-center gap-sm">
-              <div className="w-16 h-16 rounded-3xl bg-linear-to-br from-primary/15 to-primary-container/15 flex items-center justify-center text-primary">
-                <span className="material-symbols-outlined text-4xl">receipt_long</span>
+            <div className="card-elevated p-lg hover:-translate-y-0.5 transition-transform duration-300">
+              <p className="font-label-md text-label-md text-on-surface-variant mb-2">{t("totalOrders")}</p>
+              <h3 className="font-display-price text-display-price text-on-surface">{totalOrders}</h3>
+            </div>
+            <div className="card-elevated p-lg hover:-translate-y-0.5 transition-transform duration-300">
+              <p className="font-label-md text-label-md text-on-surface-variant mb-2">{t("averageOrder")}</p>
+              <h3 className="font-display-price text-display-price text-on-surface">{formatCurrency(averageOrder)}</h3>
+            </div>
+            <div className="card-elevated p-lg hover:-translate-y-0.5 transition-transform duration-300">
+              <p className="font-label-md text-label-md text-on-surface-variant mb-2">{t("cashPayments")}</p>
+              <h3 className="font-display-price text-display-price text-on-surface">{cashOrders}</h3>
+            </div>
+          </div>
+
+          <section className="card-elevated overflow-hidden">
+            <div className="px-lg py-md border-b border-outline-variant/60 bg-linear-to-r from-primary/5 to-transparent flex flex-col sm:flex-row sm:items-center sm:justify-between gap-sm">
+              <div>
+                <h3 className="font-headline-md text-headline-md text-on-surface font-extrabold">{t("salesHistory")}</h3>
+                <p className="font-label-sm text-label-sm text-on-surface-variant">
+                  {t("latestTransactions")}
+                </p>
               </div>
-              <h3 className="font-headline-md text-headline-md text-on-surface">{t("noTransactionsYet")}</h3>
-              <p className="font-body-md text-body-md text-on-surface-variant max-w-md">
-                {t("completeSaleInstruction")}
-              </p>
-              <Link
-                href="/"
-                className="mt-2 btn-primary font-label-md py-sm px-md rounded-2xl flex items-center justify-center gap-xs active:scale-[0.97] min-h-11 cursor-pointer"
-              >
-                {t("goToCheckout")}
-              </Link>
+              <span className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm border border-primary/20">
+                {totalOrders} {t("savedSales")}
+              </span>
             </div>
-          )}
-        </section>
+
+            {transactions.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse min-w-240">
+                  <thead className="bg-surface-container-low border-b border-outline-variant font-label-md text-label-md text-on-surface-variant">
+                    <tr>
+                      <th className="p-md font-semibold">{t("colOrder")}</th>
+                      <th className="p-md font-semibold">{t("colTime")}</th>
+                      <th className="p-md font-semibold text-right">{t("colItems")}</th>
+                      <th className="p-md font-semibold">{t("colPayment")}</th>
+                      <th className="p-md font-semibold text-right">{t("colSubtotal")}</th>
+                      <th className="p-md font-semibold text-right">{t("colTax")}</th>
+                      <th className="p-md font-semibold text-right">{t("colTotal")}</th>
+                      <th className="p-md font-semibold text-right">{t("colChange")}</th>
+                    </tr>
+                  </thead>
+                  <tbody className="font-body-md text-body-md text-on-surface">
+                    {transactions.map((transaction) => (
+                      <TransactionRow key={transaction.id} transaction={transaction} formatDateTime={formatDateTime} />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="p-xl text-center flex flex-col items-center justify-center gap-sm">
+                <div className="w-16 h-16 rounded-3xl bg-linear-to-br from-primary/15 to-primary-container/15 flex items-center justify-center text-primary">
+                  <span className="material-symbols-outlined text-4xl">receipt_long</span>
+                </div>
+                <h3 className="font-headline-md text-headline-md text-on-surface">{t("noTransactionsYet")}</h3>
+                <p className="font-body-md text-body-md text-on-surface-variant max-w-md">
+                  {t("completeSaleInstruction")}
+                </p>
+                <Link
+                  href="/"
+                  className="mt-2 btn-primary font-label-md py-sm px-md rounded-2xl flex items-center justify-center gap-xs active:scale-[0.97] min-h-11 cursor-pointer"
+                >
+                  {t("goToCheckout")}
+                </Link>
+              </div>
+            )}
+          </section>
+        </div>
       </main>
     </Shell>
   );

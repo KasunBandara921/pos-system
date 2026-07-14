@@ -9,6 +9,7 @@ import Shell from "./components/Shell";
 import { getProducts, bulkDeductStock } from "./actions/products";
 import { createTransaction } from "./actions/transactions";
 import { jsPDF } from "jspdf";
+import { useLanguage } from "./context/LanguageContext";
 
 interface ReceiptData {
   orderId: string;
@@ -153,6 +154,8 @@ const downloadPDFReceipt = (receipt: ReceiptData | null) => {
 };
 
 export default function CheckoutPage() {
+  const { language, t } = useLanguage();
+
   // Application State
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -230,7 +233,11 @@ export default function CheckoutPage() {
   // Handlers
   const handleAddToCart = (product: Product) => {
     if (product.stock <= 0) {
-      alert(`${product.name} is out of stock.`);
+      alert(
+        language === "en"
+          ? `${product.name} is out of stock.`
+          : `${product.name} තොග අවසන් වී ඇත.`
+      );
       return;
     }
 
@@ -240,7 +247,11 @@ export default function CheckoutPage() {
       // Calculate quantity requested
       const currentQty = existingItem ? existingItem.quantity : 0;
       if (currentQty >= product.stock) {
-        alert(`Cannot add more. Only ${product.stock} items left in stock.`);
+        alert(
+          language === "en"
+            ? `Cannot add more. Only ${product.stock} items left in stock.`
+            : `තවදුරටත් එක් කළ නොහැක. තොගයේ ඉතිරිව ඇත්තේ භාණ්ඩ ${product.stock}ක් පමණි.`
+        );
         return prevCart;
       }
 
@@ -268,7 +279,11 @@ export default function CheckoutPage() {
             
             // Check stock limits on increment
             if (delta > 0 && nextQty > product.stock) {
-              alert(`Cannot add more. Only ${product.stock} items left in stock.`);
+              alert(
+                language === "en"
+                  ? `Cannot add more. Only ${product.stock} items left in stock.`
+                  : `තවදුරටත් එක් කළ නොහැක. තොගයේ ඉතිරිව ඇත්තේ භාණ්ඩ ${product.stock}ක් පමණි.`
+              );
               return item;
             }
 
@@ -286,7 +301,11 @@ export default function CheckoutPage() {
 
   const handleCancelSale = () => {
     if (cart.length === 0) return;
-    if (confirm("Are you sure you want to cancel the current sale?")) {
+    const cancelMsg = language === "en"
+      ? "Are you sure you want to cancel the current sale?"
+      : "වත්මන් විකිණීම අවලංගු කිරීමට අවශ්‍ය බව ස්ථිරද?";
+
+    if (confirm(cancelMsg)) {
       setCart([]);
     }
   };
@@ -295,13 +314,19 @@ export default function CheckoutPage() {
     if (cart.length === 0) return;
     setSuspendedCarts((prev) => [...prev, cart]);
     setCart([]);
-    alert("Sale suspended successfully.");
+    alert(
+      language === "en"
+        ? "Sale suspended successfully."
+        : "විකිණීම සාර්ථකව අත්හිටුවන ලදී."
+    );
   };
 
   const handleResumeSale = (index: number) => {
     if (cart.length > 0) {
       const confirmResume = confirm(
-        "You have items in your current cart. Suspend current cart first?"
+        language === "en"
+          ? "You have items in your current cart. Suspend current cart first?"
+          : "ඔබගේ වත්මන් කරත්තයේ භාණ්ඩ තිබේ. මුලින්ම එය අත්හිටුවන්නද?"
       );
       if (confirmResume) {
         setSuspendedCarts((prev) => [...prev, cart]);
@@ -348,7 +373,11 @@ export default function CheckoutPage() {
       await bulkDeductStock(itemsToDeduct);
     } catch (error) {
       console.error("Failed to persist stock deduction:", error);
-      alert("Failed to update inventory stock in database, but order completed locally.");
+      alert(
+        language === "en"
+          ? "Failed to update inventory stock in database, but order completed locally."
+          : "දත්ත සමුදායේ තොග යාවත්කාලීන කිරීමට අපොහොසත් විය, නමුත් ඇණවුම දේශීයව සම්පූර්ණ කරන ලදී."
+      );
     }
 
     const orderId = `LWD-${Math.floor(100000 + Math.random() * 900000)}`;
@@ -367,7 +396,11 @@ export default function CheckoutPage() {
       });
     } catch (error) {
       console.error("Failed to save transaction:", error);
-      alert("The sale completed, but saving the transaction history failed.");
+      alert(
+        language === "en"
+          ? "The sale completed, but saving the transaction history failed."
+          : "විකිණීම සම්පූර්ණ විය, නමුත් ගනුදෙනු ඉතිහාසය සුරැකීම අපොහොසත් විය."
+      );
     }
 
     // Open Success Receipt Screen
@@ -397,14 +430,16 @@ export default function CheckoutPage() {
       {completedReceipt ? (
         /* Checkout Completion Receipt Success Screen */
         <main className="flex-1 overflow-y-auto flex items-center justify-center p-lg">
-          <div className="card-elevated w-full max-w-124 p-lg animate-rise-in text-center flex flex-col gap-md">
+          <div className="card-elevated w-full max-w-124 p-lg animate-rise-in text-center flex flex-col gap-md animate-fade-in">
             <div className="w-20 h-20 bg-linear-to-br from-primary/15 to-primary-container/15 rounded-3xl flex items-center justify-center text-primary mx-auto shadow-[0_8px_24px_rgba(5,150,105,0.15)]">
               <span className="material-symbols-outlined text-5xl fill">check_circle</span>
             </div>
             <div>
-              <h2 className="font-headline-md text-headline-md text-on-surface font-bold">Payment Success!</h2>
+              <h2 className="font-headline-md text-headline-md text-on-surface font-bold">
+                {language === "en" ? "Payment Success!" : "ගෙවීම සාර්ථකයි!"}
+              </h2>
               <p className="text-on-surface-variant font-label-sm text-label-sm">
-                Order {completedReceipt.orderId} • Completed at {completedReceipt.timestamp}
+                {language === "en" ? "Order" : "ඇණවුම"} {completedReceipt.orderId} • {language === "en" ? "Completed at" : "සම්පූර්ණ කළ වේලාව"} {completedReceipt.timestamp}
               </p>
             </div>
 
@@ -422,31 +457,31 @@ export default function CheckoutPage() {
               </div>
               <div className="border-t border-outline-variant/30 pt-xs flex flex-col gap-1 text-xs">
                 <div className="flex justify-between text-on-surface-variant">
-                  <span>Subtotal</span>
+                  <span>{t("subtotal")}</span>
                   <span>Rs. {completedReceipt.subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-on-surface-variant">
-                  <span>Tax (8.5%)</span>
+                  <span>{t("tax")}</span>
                   <span>Rs. {completedReceipt.tax.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between font-bold text-sm text-on-surface mt-xs">
-                  <span>Total Amount</span>
+                  <span>{language === "en" ? "Total Amount" : "මුළු මුදල"}</span>
                   <span className="text-primary">Rs. {completedReceipt.total.toFixed(2)}</span>
                 </div>
               </div>
               <div className="border-t border-outline-variant/30 pt-xs text-xs text-on-surface-variant flex flex-col gap-1">
                 <div className="flex justify-between">
-                  <span>Payment Method</span>
-                  <span>{completedReceipt.paymentMethod}</span>
+                  <span>{t("colPayment")}</span>
+                  <span>{completedReceipt.paymentMethod === "Cash" ? (language === "en" ? "Cash" : "මුදල්") : completedReceipt.paymentMethod}</span>
                 </div>
                 {completedReceipt.paymentMethod === "Cash" && (
                   <>
                     <div className="flex justify-between">
-                      <span>Amount Tendered</span>
+                      <span>{language === "en" ? "Amount Tendered" : "ගෙවූ මුදල"}</span>
                       <span>Rs. {completedReceipt.amountTendered.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between font-bold text-on-surface">
-                      <span>Change Returned</span>
+                      <span>{language === "en" ? "Change Returned" : "ඉතිරි මුදල"}</span>
                       <span>Rs. {completedReceipt.changeDue.toFixed(2)}</span>
                     </div>
                   </>
@@ -458,17 +493,17 @@ export default function CheckoutPage() {
             <div className="flex gap-sm">
               <button
                 onClick={() => downloadPDFReceipt(completedReceipt)}
-                className="flex-1 bg-surface border border-outline-variant/60 text-on-surface hover:bg-surface-container-low font-label-md text-label-md py-sm rounded-2xl flex items-center justify-center gap-xs min-h-11 transition-all hover:shadow-sm"
+                className="flex-1 bg-surface border border-outline-variant/60 text-on-surface hover:bg-surface-container-low font-label-md text-label-md py-sm rounded-2xl flex items-center justify-center gap-xs min-h-11 transition-all hover:shadow-sm cursor-pointer font-semibold"
               >
                 <span className="material-symbols-outlined text-sm">download</span>
-                Download PDF
+                {language === "en" ? "Download PDF" : "PDF බාගන්න"}
               </button>
               <button
                 onClick={handleNewSale}
-                className="flex-1 btn-primary font-label-md text-label-md py-sm rounded-2xl flex items-center justify-center gap-xs min-h-11 active:scale-[0.98]"
+                className="flex-1 btn-primary font-label-md text-label-md py-sm rounded-2xl flex items-center justify-center gap-xs min-h-11 active:scale-[0.98] cursor-pointer font-semibold"
               >
                 <span className="material-symbols-outlined text-sm">fiber_new</span>
-                New Order
+                {language === "en" ? "New Order" : "නව ඇණවුම"}
               </button>
             </div>
           </div>
@@ -485,13 +520,13 @@ export default function CheckoutPage() {
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`px-md py-xs rounded-2xl font-label-md text-label-md whitespace-nowrap min-h-10 transition-all ${
+                    className={`px-md py-xs rounded-2xl font-label-md text-label-md whitespace-nowrap min-h-10 transition-all cursor-pointer ${
                       selectedCategory === cat
                         ? "btn-primary font-bold shadow-[0_4px_12px_rgba(5,150,105,0.25)]"
                         : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface border border-transparent hover:border-outline-variant/40"
                     }`}
                   >
-                    {cat}
+                    {t(cat)}
                   </button>
                 ))}
               </div>
@@ -502,7 +537,9 @@ export default function CheckoutPage() {
               {isLoading ? (
                 <div className="col-span-full py-xl text-center text-on-surface-variant flex flex-col items-center justify-center gap-xs">
                   <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                  <p className="font-label-md text-label-md mt-sm">Loading product catalog...</p>
+                  <p className="font-label-md text-label-md mt-sm">
+                    {language === "en" ? "Loading product catalog..." : "භාණ්ඩ නාමාවලිය පූරණය වෙමින්..."}
+                  </p>
                 </div>
               ) : filteredProducts.length > 0 ? (
                 filteredProducts.map((product) => {
@@ -537,7 +574,9 @@ export default function CheckoutPage() {
                               ? "bg-warning-container/95 text-on-warning-container border border-amber-200/60"
                               : "bg-error-container/95 text-on-error-container border border-red-200/60"
                         }`}>
-                          {availableStock > 0 ? `${availableStock} In Stock` : "Out of Stock"}
+                          {availableStock > 0 
+                            ? `${availableStock} ${t("inStock")}` 
+                            : t("outOfStock")}
                         </div>
                       </div>
 
@@ -550,7 +589,9 @@ export default function CheckoutPage() {
                           <span className="font-headline-md text-headline-md text-primary font-bold leading-none">
                             Rs. {product.price.toFixed(2)}
                           </span>
-                          <span className="text-xs text-on-surface-variant whitespace-nowrap">{product.unit}</span>
+                          <span className="text-xs text-on-surface-variant whitespace-nowrap">
+                            {product.unit}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -559,7 +600,9 @@ export default function CheckoutPage() {
               ) : (
                 <div className="col-span-full py-xl text-center text-on-surface-variant flex flex-col items-center justify-center gap-xs">
                   <span className="material-symbols-outlined text-4xl">search_off</span>
-                  <p className="font-label-md text-label-md">No products found matching your search criteria.</p>
+                  <p className="font-label-md text-label-md">
+                    {language === "en" ? "No products found matching your search criteria." : "ඔබගේ සෙවුම් නිර්ණායකයට ගැළපෙන කිසිදු භාණ්ඩයක් හමු නොවීය."}
+                  </p>
                 </div>
               )}
             </div>
@@ -571,14 +614,16 @@ export default function CheckoutPage() {
             <div className="px-lg py-md border-b border-outline-variant/60 bg-linear-to-r from-primary/5 to-transparent flex justify-between items-center">
               <div className="flex items-center gap-xs">
                 <span className="material-symbols-outlined text-primary fill">shopping_cart</span>
-                <h2 className="font-headline-md text-headline-md text-on-surface font-bold">Current Order</h2>
+                <h2 className="font-headline-md text-headline-md text-on-surface font-bold">
+                  {language === "en" ? "Current Order" : "වත්මන් ඇණවුම"}
+                </h2>
               </div>
               {cart.length > 0 && (
                 <button
                   onClick={handleClearCart}
-                  className="text-primary hover:text-primary-container font-label-md text-label-md transition-colors min-h-11 px-sm"
+                  className="text-primary hover:text-primary-container font-label-md text-label-md transition-colors min-h-11 px-sm cursor-pointer"
                 >
-                  Clear All
+                  {language === "en" ? "Clear All" : "සියල්ල ඉවත් කරන්න"}
                 </button>
               )}
             </div>
@@ -612,7 +657,7 @@ export default function CheckoutPage() {
                         {item.product.name}
                       </h4>
                       <p className="font-mono-data text-on-surface-variant text-sm">
-                        Rs. {item.product.price.toFixed(2)}/ea
+                        Rs. {item.product.price.toFixed(2)}/{language === "en" ? "ea" : "එකක්"}
                       </p>
                     </div>
 
@@ -620,7 +665,7 @@ export default function CheckoutPage() {
                     <div className="flex items-center bg-surface-container-highest rounded-2xl border border-outline-variant overflow-hidden">
                       <button
                         onClick={() => handleUpdateQuantity(item.product.id, -1)}
-                        className="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors"
+                        className="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
                       >
                         <span className="material-symbols-outlined text-sm">remove</span>
                       </button>
@@ -629,7 +674,7 @@ export default function CheckoutPage() {
                       </span>
                       <button
                         onClick={() => handleUpdateQuantity(item.product.id, 1)}
-                        className="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors"
+                        className="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
                       >
                         <span className="material-symbols-outlined text-sm">add</span>
                       </button>
@@ -644,8 +689,8 @@ export default function CheckoutPage() {
               ) : (
                 <div className="flex-1 flex flex-col items-center justify-center text-on-surface-variant gap-xs">
                   <span className="material-symbols-outlined text-4xl">shopping_cart</span>
-                  <p className="font-label-md text-label-md">Your cart is empty.</p>
-                  <p className="text-xs text-center px-lg">Click on products to add them to the checkout sheet.</p>
+                  <p className="font-label-md text-label-md">{t("emptyCartLabel")}</p>
+                  <p className="text-xs text-center px-lg">{t("scanInstruction")}</p>
                 </div>
               )}
             </div>
@@ -654,15 +699,15 @@ export default function CheckoutPage() {
             <div className="bg-surface border-t border-outline-variant/60 p-lg">
               <div className="flex flex-col gap-2 mb-md">
                 <div className="flex justify-between items-center text-on-surface-variant font-body-md text-body-md">
-                  <span>Subtotal</span>
+                  <span>{t("subtotal")}</span>
                   <span className="font-mono-data">Rs. {subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center text-on-surface-variant font-body-md text-body-md">
-                  <span>Tax (8.5%)</span>
+                  <span>{t("tax")}</span>
                   <span className="font-mono-data">Rs. {tax.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center text-on-surface mt-sm border-t border-outline-variant/50 pt-sm">
-                  <span className="font-headline-md text-headline-md font-bold">Total</span>
+                  <span className="font-headline-md text-headline-md font-bold">{t("total")}</span>
                   <span className="font-display-price text-[28px] gradient-text">Rs. {total.toFixed(2)}</span>
                 </div>
               </div>
@@ -670,38 +715,38 @@ export default function CheckoutPage() {
               <button
                 disabled={cart.length === 0}
                 onClick={() => setIsPaymentModalOpen(true)}
-                className={`w-full font-headline-md text-headline-md py-md rounded-2xl flex items-center justify-center gap-sm transition-all min-h-16 ${
+                className={`w-full font-headline-md text-headline-md py-md rounded-2xl flex items-center justify-center gap-sm transition-all min-h-16 cursor-pointer ${
                   cart.length === 0
                     ? "bg-surface-container-highest text-on-surface-variant border border-outline-variant/60 cursor-not-allowed"
                     : "btn-primary active:scale-[0.98]"
                 }`}
               >
                 <span className="material-symbols-outlined text-2xl">payments</span>
-                Pay Now
+                {t("payButton")}
               </button>
 
               <div className="grid grid-cols-2 gap-sm mt-sm">
                 <button
                   onClick={handleSuspendSale}
                   disabled={cart.length === 0}
-                  className={`border border-outline-variant font-label-md text-label-md py-sm rounded-2xl transition-colors min-h-11 ${
+                  className={`border border-outline-variant font-label-md text-label-md py-sm rounded-2xl transition-colors min-h-11 cursor-pointer ${
                     cart.length === 0
                       ? "bg-surface-container-lowest text-on-surface-variant opacity-50 cursor-not-allowed"
                       : "bg-surface text-on-surface-variant hover:bg-surface-container-low"
                   }`}
                 >
-                  Suspend
+                  {language === "en" ? "Suspend" : "අත්හිටුවන්න"}
                 </button>
                 <button
                   onClick={handleCancelSale}
                   disabled={cart.length === 0}
-                  className={`border font-label-md text-label-md py-sm rounded-2xl transition-colors min-h-11 ${
+                  className={`border font-label-md text-label-md py-sm rounded-2xl transition-colors min-h-11 cursor-pointer ${
                     cart.length === 0
                       ? "bg-surface-container-lowest text-on-surface-variant opacity-50 border-outline-variant cursor-not-allowed"
                       : "bg-surface border-outline-variant text-error hover:bg-error-container hover:border-error-container"
                   }`}
                 >
-                  Cancel
+                  {language === "en" ? "Cancel" : "අවලංගු කරන්න"}
                 </button>
               </div>
             </div>
