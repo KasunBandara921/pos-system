@@ -4,8 +4,10 @@ import React, { useState, useEffect, useMemo } from "react";
 import Shell from "../components/Shell";
 import { getTransactions } from "../actions/transactions";
 import type { TransactionRecord, TransactionItem } from "../types";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function ReportsPage() {
+  const { t } = useLanguage();
   const [transactions, setTransactions] = useState<TransactionRecord[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -323,9 +325,9 @@ export default function ReportsPage() {
         {/* Page Header & Filters */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 card-elevated p-lg">
           <div className="space-y-1">
-            <h2 className="font-headline-lg text-headline-lg text-on-surface mb-1">Sales Reports</h2>
+            <h2 className="font-headline-lg text-headline-lg text-on-surface mb-1">{t("salesReports")}</h2>
             <p className="font-body-md text-body-md text-on-surface-variant">
-              Performance overview and transactional insights.
+              {t("performanceOverview")}
             </p>
           </div>
           <div className="flex items-center gap-2 glass-panel p-2 rounded-2xl">
@@ -349,7 +351,7 @@ export default function ReportsPage() {
                 onChange={(e) => setEndDate(e.target.value)}
               />
             </div>
-            <button className="bg-surface-container hover:bg-surface-container-high text-on-surface p-xs rounded-full transition-colors ml-1 min-w-9 min-h-9 flex items-center justify-center">
+            <button className="bg-surface-container hover:bg-surface-container-high text-on-surface p-xs rounded-full transition-colors ml-1 min-w-9 min-h-9 flex items-center justify-center cursor-pointer">
               <span className="material-symbols-outlined text-[20px]">filter_list</span>
             </button>
           </div>
@@ -364,7 +366,7 @@ export default function ReportsPage() {
               <div className="absolute top-0 right-0 p-4 opacity-[0.07] transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform duration-500">
                 <span className="material-symbols-outlined text-8xl text-primary">payments</span>
               </div>
-              <p className="font-label-md text-label-md text-on-surface-variant mb-2">Total Sales</p>
+              <p className="font-label-md text-label-md text-on-surface-variant mb-2">{t("totalSales")}</p>
               <h3 className="font-display-price text-display-price gradient-text mb-2">
                 {formatCurrency(stats.totalSales)}
               </h3>
@@ -375,7 +377,7 @@ export default function ReportsPage() {
                   {stats.salesChange >= 0 ? "trending_up" : "trending_down"}
                 </span>
                 <span>
-                  {stats.salesChange >= 0 ? "+" : ""}{stats.salesChange.toFixed(1)}% vs last period
+                  {stats.salesChange >= 0 ? "+" : ""}{stats.salesChange.toFixed(1)}% {t("vsLastPeriod")}
                 </span>
               </div>
             </div>
@@ -385,7 +387,7 @@ export default function ReportsPage() {
               <div className="absolute top-0 right-0 p-4 opacity-[0.07] transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform duration-500">
                 <span className="material-symbols-outlined text-8xl text-tertiary">receipt_long</span>
               </div>
-              <p className="font-label-md text-label-md text-on-surface-variant mb-2">Average Order Value</p>
+              <p className="font-label-md text-label-md text-on-surface-variant mb-2">{t("averageOrderValue")}</p>
               <h3 className="font-display-price text-display-price text-on-surface mb-2">
                 {formatCurrency(stats.averageOrderValue)}
               </h3>
@@ -396,7 +398,7 @@ export default function ReportsPage() {
                   {stats.aovChange >= 0 ? "trending_up" : "trending_down"}
                 </span>
                 <span>
-                  {stats.aovChange >= 0 ? "+" : ""}{stats.aovChange.toFixed(1)}% vs last period
+                  {stats.aovChange >= 0 ? "+" : ""}{stats.aovChange.toFixed(1)}% {t("vsLastPeriod")}
                 </span>
               </div>
             </div>
@@ -406,7 +408,7 @@ export default function ReportsPage() {
               <div className="absolute top-0 right-0 p-4 opacity-[0.07] transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform duration-500">
                 <span className="material-symbols-outlined text-8xl text-secondary">shopping_bag</span>
               </div>
-              <p className="font-label-md text-label-md text-on-surface-variant mb-2">Total Transactions</p>
+              <p className="font-label-md text-label-md text-on-surface-variant mb-2">{t("totalTransactions")}</p>
               <h3 className="font-display-price text-display-price text-on-surface mb-2">
                 {stats.totalTransactions}
               </h3>
@@ -417,7 +419,7 @@ export default function ReportsPage() {
                   {stats.txChange >= 0 ? "trending_up" : "trending_down"}
                 </span>
                 <span>
-                  {stats.txChange >= 0 ? "+" : ""}{stats.txChange.toFixed(1)}% vs last period
+                  {stats.txChange >= 0 ? "+" : ""}{stats.txChange.toFixed(1)}% {t("vsLastPeriod")}
                 </span>
               </div>
             </div>
@@ -426,8 +428,8 @@ export default function ReportsPage() {
           {/* Main Chart Area (Daily Revenue) */}
           <div className="lg:col-span-8 card-elevated p-lg">
             <div className="flex justify-between items-center mb-md">
-              <h3 className="font-headline-md text-headline-md text-on-surface">Daily Revenue Trends</h3>
-              <button className="p-xs text-on-surface-variant hover:bg-surface-container rounded-full transition-colors min-w-9 min-h-9 flex items-center justify-center">
+              <h3 className="font-headline-md text-headline-md text-on-surface">{t("dailyRevenueTrends")}</h3>
+              <button className="p-xs text-on-surface-variant hover:bg-surface-container rounded-full transition-colors min-w-9 min-h-9 flex items-center justify-center cursor-pointer">
                 <span className="material-symbols-outlined">more_vert</span>
               </button>
             </div>
@@ -517,7 +519,7 @@ export default function ReportsPage() {
                   </>
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center text-on-surface-variant font-label-md text-label-md">
-                    No sales recorded for this period.
+                    {t("noSalesPeriod")}
                   </div>
                 )}
               </div>
@@ -534,8 +536,8 @@ export default function ReportsPage() {
           {/* Top Selling Items */}
           <div className="lg:col-span-4 card-elevated p-lg flex flex-col">
             <div className="flex justify-between items-center mb-md">
-              <h3 className="font-headline-md text-headline-md text-on-surface">Top Selling Items</h3>
-              <button className="p-xs text-on-surface-variant hover:bg-surface-container rounded-full transition-colors min-w-9 min-h-9 flex items-center justify-center">
+              <h3 className="font-headline-md text-headline-md text-on-surface">{t("topSellingItems")}</h3>
+              <button className="p-xs text-on-surface-variant hover:bg-surface-container rounded-full transition-colors min-w-9 min-h-9 flex items-center justify-center cursor-pointer">
                 <span className="material-symbols-outlined">filter_list</span>
               </button>
             </div>
@@ -564,8 +566,8 @@ export default function ReportsPage() {
                 </div>
               ))}
             </div>
-            <button className="mt-md w-full py-xs text-primary font-label-md text-label-md hover:bg-surface-container rounded transition-colors text-center">
-              View All Inventory Performance
+            <button className="mt-md w-full py-xs text-primary font-label-md text-label-md hover:bg-surface-container rounded transition-colors text-center cursor-pointer font-semibold">
+              {t("viewAllInventory")}
             </button>
           </div>
         </div>
