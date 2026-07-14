@@ -49,7 +49,7 @@ export async function getTransactions(): Promise<TransactionRecord[]> {
     orderBy: { createdAt: "desc" },
   });
 
-  return transactions.map((transaction) => ({
+  return (transactions as any[]).map((transaction: any) => ({
     id: transaction.id,
     orderId: transaction.orderId,
     items: transaction.items as TransactionItem[],
