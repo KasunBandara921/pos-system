@@ -10,22 +10,22 @@ export default function ReportsPage() {
 
   return (
     <Shell>
-      <main className="flex-1 p-lg overflow-y-auto bg-background flex flex-col">
+      <main className="flex-1 p-lg overflow-y-auto bg-background flex flex-col gap-lg">
         {/* Page Header & Filters */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-lg">
-          <div>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-surface-container-lowest border border-outline-variant rounded-2xl p-lg shadow-[0_12px_32px_rgba(0,0,0,0.05)]">
+          <div className="space-y-1">
             <h2 className="font-headline-lg text-headline-lg text-on-surface mb-1">Sales Reports</h2>
             <p className="font-body-md text-body-md text-on-surface-variant">
               Performance overview and transactional insights.
             </p>
           </div>
-          <div className="flex items-center gap-2 bg-surface p-1 rounded border border-outline-variant shadow-sm">
+          <div className="flex items-center gap-2 bg-surface p-2 rounded-2xl border border-outline-variant shadow-sm">
             <div className="relative flex items-center">
               <span className="material-symbols-outlined absolute left-2 text-on-surface-variant text-[18px]">
                 calendar_month
               </span>
               <input
-                className="pl-8 pr-2 py-xs bg-transparent border-none text-sm font-label-md text-on-surface focus:ring-0 cursor-pointer w-[130px]"
+                className="pl-8 pr-2 py-xs bg-transparent border-none text-sm font-label-md text-on-surface focus:ring-0 cursor-pointer w-32.5 rounded-full"
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
@@ -34,13 +34,13 @@ export default function ReportsPage() {
             <span className="text-on-surface-variant font-label-md">-</span>
             <div className="relative flex items-center">
               <input
-                className="pl-2 pr-2 py-xs bg-transparent border-none text-sm font-label-md text-on-surface focus:ring-0 cursor-pointer w-[130px]"
+                className="pl-2 pr-2 py-xs bg-transparent border-none text-sm font-label-md text-on-surface focus:ring-0 cursor-pointer w-32.5 rounded-full"
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
               />
             </div>
-            <button className="bg-surface-container hover:bg-surface-container-high text-on-surface p-xs rounded transition-colors ml-1 min-w-[32px] min-h-[32px] flex items-center justify-center">
+            <button className="bg-surface-container hover:bg-surface-container-high text-on-surface p-xs rounded-full transition-colors ml-1 min-w-9 min-h-9 flex items-center justify-center">
               <span className="material-symbols-outlined text-[20px]">filter_list</span>
             </button>
           </div>
@@ -51,39 +51,39 @@ export default function ReportsPage() {
           {/* KPI Summary Cards (Top Row) */}
           <div className="lg:col-span-12 grid grid-cols-1 sm:grid-cols-3 gap-md">
             {/* Total Sales */}
-            <div className="bg-surface p-lg rounded-xl border border-outline-variant shadow-[0_2px_8px_rgba(0,0,0,0.04)] relative overflow-hidden group">
+            <div className="bg-surface p-lg rounded-2xl border border-outline-variant shadow-[0_12px_32px_rgba(0,0,0,0.05)] relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform">
                 <span className="material-symbols-outlined text-8xl text-primary">payments</span>
               </div>
               <p className="font-label-md text-label-md text-on-surface-variant mb-2">Total Sales</p>
-              <h3 className="font-display-price text-display-price text-on-surface mb-2">$42,509.80</h3>
-              <div className="flex items-center gap-1 text-primary-container font-label-sm text-label-sm bg-primary-container/10 inline-flex px-2 py-1 rounded">
+              <h3 className="font-display-price text-display-price text-on-surface mb-2">Rs. 42,509.80</h3>
+              <div className="inline-flex items-center gap-1 text-primary-container font-label-sm text-label-sm bg-primary-container/10 px-2 py-1 rounded">
                 <span className="material-symbols-outlined text-[14px]">trending_up</span>
                 <span>+12.5% vs last month</span>
               </div>
             </div>
 
             {/* Average Order Value */}
-            <div className="bg-surface p-lg rounded-xl border border-outline-variant shadow-[0_2px_8px_rgba(0,0,0,0.04)] relative overflow-hidden group">
+            <div className="bg-surface p-lg rounded-2xl border border-outline-variant shadow-[0_12px_32px_rgba(0,0,0,0.05)] relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform">
                 <span className="material-symbols-outlined text-8xl text-tertiary">receipt_long</span>
               </div>
               <p className="font-label-md text-label-md text-on-surface-variant mb-2">Average Order Value</p>
-              <h3 className="font-display-price text-display-price text-on-surface mb-2">$84.50</h3>
-              <div className="flex items-center gap-1 text-primary-container font-label-sm text-label-sm bg-primary-container/10 inline-flex px-2 py-1 rounded">
+              <h3 className="font-display-price text-display-price text-on-surface mb-2">Rs. 84.50</h3>
+              <div className="inline-flex items-center gap-1 text-primary-container font-label-sm text-label-sm bg-primary-container/10 px-2 py-1 rounded">
                 <span className="material-symbols-outlined text-[14px]">trending_up</span>
                 <span>+3.2% vs last month</span>
               </div>
             </div>
 
             {/* Total Transactions */}
-            <div className="bg-surface p-lg rounded-xl border border-outline-variant shadow-[0_2px_8px_rgba(0,0,0,0.04)] relative overflow-hidden group">
+            <div className="bg-surface p-lg rounded-2xl border border-outline-variant shadow-[0_12px_32px_rgba(0,0,0,0.05)] relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform">
                 <span className="material-symbols-outlined text-8xl text-secondary">shopping_bag</span>
               </div>
               <p className="font-label-md text-label-md text-on-surface-variant mb-2">Total Transactions</p>
               <h3 className="font-display-price text-display-price text-on-surface mb-2">503</h3>
-              <div className="flex items-center gap-1 text-error font-label-sm text-label-sm bg-error-container/30 inline-flex px-2 py-1 rounded">
+              <div className="inline-flex items-center gap-1 text-error font-label-sm text-label-sm bg-error-container/30 px-2 py-1 rounded">
                 <span className="material-symbols-outlined text-[14px]">trending_down</span>
                 <span>-1.8% vs last month</span>
               </div>
@@ -91,10 +91,10 @@ export default function ReportsPage() {
           </div>
 
           {/* Main Chart Area (Daily Revenue) */}
-          <div className="lg:col-span-8 bg-surface rounded-xl border border-outline-variant p-lg shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+          <div className="lg:col-span-8 bg-surface rounded-2xl border border-outline-variant p-lg shadow-[0_12px_32px_rgba(0,0,0,0.05)]">
             <div className="flex justify-between items-center mb-md">
               <h3 className="font-headline-md text-headline-md text-on-surface">Daily Revenue Trends</h3>
-              <button className="p-xs text-on-surface-variant hover:bg-surface-container rounded-full transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center">
+              <button className="p-xs text-on-surface-variant hover:bg-surface-container rounded-full transition-colors min-w-9 min-h-9 flex items-center justify-center">
                 <span className="material-symbols-outlined">more_vert</span>
               </button>
             </div>
@@ -102,10 +102,10 @@ export default function ReportsPage() {
             <div className="w-full h-64 relative flex items-end justify-between pt-8 pb-4 border-b border-outline-variant/30">
               {/* Y-axis labels */}
               <div className="absolute left-0 top-0 bottom-8 w-12 flex flex-col justify-between text-right pr-2 text-on-surface-variant font-mono-data text-mono-data text-[10px] opacity-70">
-                <span>$3k</span>
-                <span>$2k</span>
-                <span>$1k</span>
-                <span>$0</span>
+                <span>Rs. 3k</span>
+                <span>Rs. 2k</span>
+                <span>Rs. 1k</span>
+                <span>Rs. 0</span>
               </div>
               {/* Grid lines */}
               <div className="absolute left-12 right-0 top-0 bottom-8 flex flex-col justify-between pointer-events-none">
@@ -154,10 +154,10 @@ export default function ReportsPage() {
           </div>
 
           {/* Top Selling Items (Bar Chart replacement) */}
-          <div className="lg:col-span-4 bg-surface rounded-xl border border-outline-variant p-lg shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex flex-col">
+          <div className="lg:col-span-4 bg-surface rounded-2xl border border-outline-variant p-lg shadow-[0_12px_32px_rgba(0,0,0,0.05)] flex flex-col">
             <div className="flex justify-between items-center mb-md">
               <h3 className="font-headline-md text-headline-md text-on-surface">Top Selling Items</h3>
-              <button className="p-xs text-on-surface-variant hover:bg-surface-container rounded-full transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center">
+              <button className="p-xs text-on-surface-variant hover:bg-surface-container rounded-full transition-colors min-w-9 min-h-9 flex items-center justify-center">
                 <span className="material-symbols-outlined">filter_list</span>
               </button>
             </div>
@@ -170,7 +170,7 @@ export default function ReportsPage() {
                 <div className="flex-1">
                   <div className="flex justify-between mb-1">
                     <span className="font-label-md text-label-md text-on-surface">Premium Cola 2L</span>
-                    <span className="font-mono-data text-mono-data text-on-surface">$1,240</span>
+                    <span className="font-mono-data text-mono-data text-on-surface">Rs. 1,240</span>
                   </div>
                   <div className="w-full bg-surface-container rounded-full h-2">
                     <div className="bg-primary h-2 rounded-full" style={{ width: "85%" }}></div>
@@ -185,7 +185,7 @@ export default function ReportsPage() {
                 <div className="flex-1">
                   <div className="flex justify-between mb-1">
                     <span className="font-label-md text-label-md text-on-surface">Artisan Sourdough</span>
-                    <span className="font-mono-data text-mono-data text-on-surface">$980</span>
+                    <span className="font-mono-data text-mono-data text-on-surface">Rs. 980</span>
                   </div>
                   <div className="w-full bg-surface-container rounded-full h-2">
                     <div className="bg-primary h-2 rounded-full opacity-80" style={{ width: "65%" }}></div>
@@ -200,7 +200,7 @@ export default function ReportsPage() {
                 <div className="flex-1">
                   <div className="flex justify-between mb-1">
                     <span className="font-label-md text-label-md text-on-surface">Organic Eggs (Dozen)</span>
-                    <span className="font-mono-data text-mono-data text-on-surface">$850</span>
+                    <span className="font-mono-data text-mono-data text-on-surface">Rs. 850</span>
                   </div>
                   <div className="w-full bg-surface-container rounded-full h-2">
                     <div className="bg-primary h-2 rounded-full opacity-60" style={{ width: "55%" }}></div>
@@ -215,7 +215,7 @@ export default function ReportsPage() {
                 <div className="flex-1">
                   <div className="flex justify-between mb-1">
                     <span className="font-label-md text-label-md text-on-surface">Vanilla Bean Pint</span>
-                    <span className="font-mono-data text-mono-data text-on-surface">$620</span>
+                    <span className="font-mono-data text-mono-data text-on-surface">Rs. 620</span>
                   </div>
                   <div className="w-full bg-surface-container rounded-full h-2">
                     <div className="bg-primary h-2 rounded-full opacity-40" style={{ width: "40%" }}></div>

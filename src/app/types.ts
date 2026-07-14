@@ -16,3 +16,24 @@ export interface CartItem {
   product: Product;
   quantity: number;
 }
+
+export interface TransactionItem {
+  productId: string;
+  name: string;
+  price: number;
+  quantity: number;
+  lineTotal: number;
+}
+
+export interface TransactionRecord {
+  id: string;
+  orderId: string;
+  items: TransactionItem[];
+  subtotal: number;
+  tax: number;
+  total: number;
+  paymentMethod: string;
+  amountTendered: number;
+  changeDue: number;
+  createdAt: string;
+}

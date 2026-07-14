@@ -144,16 +144,16 @@ export default function InventoryPage() {
     <Shell searchQuery={searchQuery} onSearchChange={setSearchQuery}>
       <main className="flex-1 p-lg overflow-y-auto bg-background flex flex-col gap-lg">
         {/* Page Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-md">
-          <div>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-md bg-surface-container-lowest border border-outline-variant rounded-2xl p-lg shadow-[0_12px_32px_rgba(0,0,0,0.05)]">
+          <div className="space-y-1">
             <h2 className="font-headline-lg text-headline-lg text-on-surface">Inventory Management</h2>
-            <p className="font-body-md text-body-md text-on-surface-variant mt-1">
+            <p className="font-body-md text-body-md text-on-surface-variant">
               Manage your product catalog and track stock levels across Terminal #01.
             </p>
           </div>
           <button
             onClick={handleOpenAdd}
-            className="bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md py-sm px-md rounded-lg flex items-center gap-xs transition-colors shadow-sm active:scale-95 whitespace-nowrap min-h-[44px]"
+            className="bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md py-sm px-md rounded-full flex items-center gap-xs transition-all shadow-sm active:scale-95 whitespace-nowrap min-h-11"
           >
             <span className="material-symbols-outlined">add</span>
             Add Product
@@ -161,7 +161,7 @@ export default function InventoryPage() {
         </div>
 
         {/* Controls & Filters Bar */}
-        <div className="bg-surface border border-outline-variant rounded-xl p-sm flex flex-col lg:flex-row gap-md justify-between items-center shadow-sm">
+        <div className="bg-surface border border-outline-variant rounded-2xl p-md flex flex-col lg:flex-row gap-md justify-between items-center shadow-[0_12px_32px_rgba(0,0,0,0.04)]">
           {/* Filters buttons */}
           <div className="flex items-center gap-sm overflow-x-auto pb-2 lg:pb-0 w-full lg:w-auto no-scrollbar">
             <button
@@ -170,28 +170,28 @@ export default function InventoryPage() {
                 selectedFilter === "All"
                   ? "bg-primary-container border-primary text-on-primary-container font-bold"
                   : "border-outline-variant text-on-surface-variant hover:bg-surface-container-low"
-              } min-h-[38px]`}
+              } min-h-9.5`}
             >
               All Items ({stats.total})
             </button>
             <button
               onClick={() => setSelectedFilter("Out of Stock")}
-              className={`px-md py-xs rounded-full font-label-md text-label-md whitespace-nowrap transition-colors border flex items-center gap-1.5 ${
+              className={`px-md py-xs rounded-full font-label-md text-label-md whitespace-nowrap transition-all border flex items-center gap-1.5 shadow-sm ${
                 selectedFilter === "Out of Stock"
                   ? "bg-red-50 border-red-500 text-red-700 font-bold"
                   : "border-outline-variant text-on-surface-variant hover:bg-surface-container-low"
-              } min-h-[38px]`}
+              } min-h-9.5`}
             >
               <span className="w-2 h-2 rounded-full bg-error"></span>
               Out of Stock ({stats.outOfStock})
             </button>
             <button
               onClick={() => setSelectedFilter("Low Stock")}
-              className={`px-md py-xs rounded-full font-label-md text-label-md whitespace-nowrap transition-colors border flex items-center gap-1.5 ${
+              className={`px-md py-xs rounded-full font-label-md text-label-md whitespace-nowrap transition-all border flex items-center gap-1.5 shadow-sm ${
                 selectedFilter === "Low Stock"
                   ? "bg-amber-50 border-amber-500 text-amber-700 font-bold"
                   : "border-outline-variant text-on-surface-variant hover:bg-surface-container-low"
-              } min-h-[38px]`}
+              } min-h-9.5`}
             >
               <span className="w-2 h-2 rounded-full bg-secondary"></span>
               Low Stock ({stats.lowStock})
@@ -204,7 +204,7 @@ export default function InventoryPage() {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full appearance-none bg-surface-container-lowest border border-outline-variant text-on-surface font-body-md text-body-md py-xs pl-sm pr-xl rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary min-h-[38px]"
+                className="w-full appearance-none bg-surface-container-lowest border border-outline-variant text-on-surface font-body-md text-body-md py-xs pl-sm pr-xl rounded-full focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary min-h-9.5"
               >
                 {uniqueCategories.map((cat) => (
                   <option key={cat} value={cat}>
@@ -220,9 +220,9 @@ export default function InventoryPage() {
         </div>
 
         {/* Data Table Container */}
-        <div className="bg-surface border border-outline-variant rounded-xl shadow-sm overflow-hidden flex flex-col">
+        <div className="bg-surface border border-outline-variant rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[800px]">
+            <table className="w-full text-left border-collapse min-w-200">
               <thead className="bg-surface-container-low border-b border-outline-variant font-label-md text-label-md text-on-surface-variant">
                 <tr>
                   <th className="p-md font-semibold">Product Details</th>
@@ -260,7 +260,7 @@ export default function InventoryPage() {
                         {/* Product details */}
                         <td className="p-md">
                           <div className="flex items-center gap-sm">
-                            <div className="w-12 h-12 bg-surface-container rounded border border-outline-variant overflow-hidden flex-shrink-0 flex items-center justify-center">
+                            <div className="w-12 h-12 bg-surface-container rounded-2xl border border-outline-variant overflow-hidden shrink-0 flex items-center justify-center">
                               {product.image ? (
                                 <img
                                   alt={product.name}
@@ -296,7 +296,7 @@ export default function InventoryPage() {
 
                         {/* Price */}
                         <td className="p-md text-right font-semibold">
-                          ${product.price.toFixed(2)}
+                          Rs. {product.price.toFixed(2)}
                         </td>
 
                         {/* Quantity (Stock) */}
@@ -368,7 +368,7 @@ export default function InventoryPage() {
           </div>
 
           {/* Pagination Footer */}
-          <div className="bg-surface-container-lowest border-t border-outline-variant p-sm flex items-center justify-between">
+          <div className="bg-surface-container-lowest border-t border-outline-variant px-lg py-sm flex items-center justify-between">
             <p className="font-label-sm text-label-sm text-on-surface-variant">
               Showing {showingStart} to {showingEnd} of {totalItems} products
             </p>
@@ -378,7 +378,7 @@ export default function InventoryPage() {
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="p-xs rounded text-on-surface-variant hover:bg-surface-container-low transition-colors disabled:opacity-50 min-w-[36px] min-h-[36px] flex items-center justify-center"
+                  className="p-xs rounded text-on-surface-variant hover:bg-surface-container-low transition-colors disabled:opacity-50 min-w-9 min-h-9 flex items-center justify-center"
                 >
                   <span className="material-symbols-outlined text-[20px]">chevron_left</span>
                 </button>
@@ -390,7 +390,7 @@ export default function InventoryPage() {
                     <button
                       key={pNum}
                       onClick={() => setCurrentPage(pNum)}
-                      className={`p-xs rounded font-label-sm min-w-[36px] min-h-[36px] flex items-center justify-center transition-colors ${
+                      className={`p-xs rounded-full font-label-sm min-w-9 min-h-9 flex items-center justify-center transition-colors ${
                         currentPage === pNum
                           ? "text-on-surface hover:bg-surface-container-low font-semibold bg-surface-container"
                           : "text-on-surface-variant hover:bg-surface-container-low"
@@ -405,7 +405,7 @@ export default function InventoryPage() {
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="p-xs rounded text-on-surface-variant hover:bg-surface-container-low transition-colors disabled:opacity-50 min-w-[36px] min-h-[36px] flex items-center justify-center"
+                  className="p-xs rounded text-on-surface-variant hover:bg-surface-container-low transition-colors disabled:opacity-50 min-w-9 min-h-9 flex items-center justify-center"
                 >
                   <span className="material-symbols-outlined text-[20px]">chevron_right</span>
                 </button>

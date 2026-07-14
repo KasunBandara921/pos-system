@@ -75,6 +75,19 @@
 /* Base style settings */
 body {
   font-family: 'Inter', sans-serif;
+  background: var(--color-background);
+  color: var(--color-on-background);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-primary-container) 24%, transparent);
+  color: var(--color-on-surface);
 }
 
 .material-symbols-outlined {
@@ -97,6 +110,45 @@ body {
 
 .material-symbols-outlined.fill {
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@utility animate-fade-in {
+  animation: fade-in 220ms ease-out both;
+}
+
+@utility animate-rise-in {
+  animation: rise-in 260ms ease-out both;
+}
+
+@utility card-surface {
+  border-radius: 1rem;
+  border: 1px solid var(--color-outline-variant);
+  background: var(--color-surface);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.04);
 }
 
 /* Custom fonts utilities to support the classes in provided html */
