@@ -32,25 +32,33 @@ export default function Shell({
     }
   };
 
+  const navLinks = [
+    { href: "/", label: "Checkout", icon: "shopping_cart" },
+    { href: "/inventory", label: "Inventory", icon: "inventory_2" },
+    { href: "/reports", label: "Reports", icon: "bar_chart" },
+    { href: "/transactions", label: "Transactions", icon: "receipt_long" },
+  ];
+
   return (
-    <div className="h-screen w-full overflow-hidden flex bg-background text-on-background">
+    <div className="h-screen w-full overflow-hidden flex text-on-background">
       {/* Side Navigation Bar */}
-      <nav className="bg-surface/95 dark:bg-surface-container-high/95 backdrop-blur-md border-r border-outline-variant h-[calc(100vh-1.5rem)] w-64 flex flex-col fixed left-3 top-3 z-40 transition-colors duration-200 rounded-2xl shadow-sm overflow-hidden">
+      <nav className="glass-panel h-[calc(100vh-1.5rem)] w-64 flex flex-col fixed left-3 top-3 z-40 rounded-3xl shadow-[0_8px_40px_rgba(15,23,42,0.08)] overflow-hidden">
         {/* Header Store Details */}
-        <div className="p-lg border-b border-outline-variant bg-surface-container-lowest/70">
+        <div className="p-lg border-b border-outline-variant/60">
           <div className="flex items-center gap-sm mb-md">
-            <div className="w-11 h-11 rounded-2xl bg-primary-container flex items-center justify-center text-on-primary-container font-headline-md shadow-sm">
-              <span className="material-symbols-outlined fill">storefront</span>
+            <div className="w-11 h-11 rounded-2xl bg-linear-to-br from-primary to-primary-container flex items-center justify-center text-white shadow-[0_4px_14px_rgba(5,150,105,0.35)]">
+              <span className="material-symbols-outlined fill text-[22px]">storefront</span>
             </div>
             <div>
-              <h1 className="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed leading-tight tracking-tight">
+              <h1 className="font-headline-md text-headline-md font-bold gradient-text leading-tight tracking-tight">
                 Lewdeniya Stores
               </h1>
+              <p className="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Terminal #01</p>
             </div>
           </div>
           <button
             onClick={handleNewSale}
-            className="w-full bg-primary hover:bg-primary-container text-on-primary font-label-md py-sm px-md rounded-full flex items-center justify-center gap-xs transition-all shadow-sm active:scale-95 min-h-11"
+            className="w-full btn-primary font-label-md py-sm px-md rounded-2xl flex items-center justify-center gap-xs active:scale-[0.97] min-h-11"
           >
             <span className="material-symbols-outlined text-[18px]">add</span>
             New Sale
@@ -59,67 +67,30 @@ export default function Shell({
 
         {/* Main Nav Links */}
         <div className="flex-1 py-md overflow-y-auto">
-          <ul className="space-y-xs px-sm font-body-md text-body-md">
-            <li>
-              <Link
-                href="/"
-                className={`flex items-center gap-sm px-md py-sm rounded-2xl transition-all duration-200 min-h-11 ${
-                  pathname === "/"
-                    ? "text-primary dark:text-primary-fixed-dim font-bold bg-primary-container/10 ring-1 ring-primary/20 shadow-sm"
-                    : "text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-low"
-                }`}
-              >
-                <span className={`material-symbols-outlined ${pathname === "/" ? "fill" : ""}`}>
-                  shopping_cart
-                </span>
-                Checkout
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/inventory"
-                className={`flex items-center gap-sm px-md py-sm rounded-2xl transition-all duration-200 min-h-11 ${
-                  pathname === "/inventory"
-                    ? "text-primary dark:text-primary-fixed-dim font-bold bg-primary-container/10 ring-1 ring-primary/20 shadow-sm"
-                    : "text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-low"
-                }`}
-              >
-                <span className={`material-symbols-outlined ${pathname === "/inventory" ? "fill" : ""}`}>
-                  inventory_2
-                </span>
-                Inventory
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/reports"
-                className={`flex items-center gap-sm px-md py-sm rounded-2xl transition-all duration-200 min-h-11 ${
-                  pathname === "/reports"
-                    ? "text-primary dark:text-primary-fixed-dim font-bold bg-primary-container/10 ring-1 ring-primary/20 shadow-sm"
-                    : "text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-low"
-                }`}
-              >
-                <span className={`material-symbols-outlined ${pathname === "/reports" ? "fill" : ""}`}>
-                  bar_chart
-                </span>
-                Reports
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/transactions"
-                className={`flex items-center gap-sm px-md py-sm rounded-2xl transition-all duration-200 min-h-11 ${
-                  pathname === "/transactions"
-                    ? "text-primary dark:text-primary-fixed-dim font-bold bg-primary-container/10 ring-1 ring-primary/20 shadow-sm"
-                    : "text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-low"
-                }`}
-              >
-                <span className={`material-symbols-outlined ${pathname === "/transactions" ? "fill" : ""}`}>
-                  receipt_long
-                </span>
-                Transactions
-              </Link>
-            </li>
+          <p className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest px-lg mb-sm opacity-70">
+            Menu
+          </p>
+          <ul className="space-y-1 px-sm font-body-md text-body-md">
+            {navLinks.map(({ href, label, icon }) => {
+              const isActive = pathname === href;
+              return (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    className={`flex items-center gap-sm px-md py-sm rounded-2xl transition-all duration-200 min-h-11 ${
+                      isActive
+                        ? "nav-active"
+                        : "text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface"
+                    }`}
+                  >
+                    <span className={`material-symbols-outlined text-[22px] ${isActive ? "fill" : ""}`}>
+                      {icon}
+                    </span>
+                    {label}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
 
           {/* Suspended Sales Section */}
@@ -135,9 +106,9 @@ export default function Shell({
                     <button
                       key={index}
                       onClick={() => onResumeCart && onResumeCart(index)}
-                      className="text-left w-full p-sm rounded-2xl border border-outline-variant bg-surface hover:bg-surface-container flex items-center justify-between text-xs transition-all shadow-sm"
+                      className="text-left w-full p-sm rounded-xl border border-outline-variant/60 bg-surface-container-low hover:bg-surface-container hover:border-primary/30 flex items-center justify-between text-xs transition-all"
                     >
-                      <span className="truncate text-on-surface">Order #{index + 1}</span>
+                      <span className="truncate text-on-surface font-medium">Order #{index + 1}</span>
                       <span className="font-mono text-primary font-bold">Rs. {scTotal.toFixed(2)}</span>
                     </button>
                   );
@@ -148,23 +119,23 @@ export default function Shell({
         </div>
 
         {/* Footer Links */}
-        <div className="p-sm border-t border-outline-variant bg-surface-container-lowest/70">
-          <ul className="space-y-xs font-body-md text-body-md">
+        <div className="p-sm border-t border-outline-variant/60">
+          <ul className="space-y-1 font-body-md text-body-md">
             <li>
               <Link
                 href="#"
-                className="flex items-center gap-sm px-md py-sm rounded-2xl text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200 min-h-11"
+                className="flex items-center gap-sm px-md py-sm rounded-2xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors duration-200 min-h-11"
               >
-                <span className="material-symbols-outlined">settings</span>
+                <span className="material-symbols-outlined text-[22px]">settings</span>
                 Settings
               </Link>
             </li>
             <li>
               <Link
                 href="#"
-                className="flex items-center gap-sm px-md py-sm rounded-2xl text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200 min-h-11"
+                className="flex items-center gap-sm px-md py-sm rounded-2xl text-on-surface-variant hover:bg-error-container/50 hover:text-error transition-colors duration-200 min-h-11"
               >
-                <span className="material-symbols-outlined">logout</span>
+                <span className="material-symbols-outlined text-[22px]">logout</span>
                 Logout
               </Link>
             </li>
@@ -173,18 +144,17 @@ export default function Shell({
       </nav>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 ml-68 bg-background pr-3 py-3">
+      <div className="flex-1 flex flex-col min-w-0 ml-68 pr-3 py-3">
         {/* Top Header Bar */}
-        <header className="bg-surface/95 dark:bg-surface-dim/95 backdrop-blur-md border border-outline-variant flex justify-between items-center w-full px-lg py-sm sticky top-3 z-30 h-18 rounded-2xl shadow-sm">
+        <header className="glass-panel flex justify-between items-center w-full px-lg py-sm sticky top-3 z-30 h-18 rounded-3xl shadow-[0_4px_24px_rgba(15,23,42,0.06)]">
           <div className="flex items-center gap-md flex-1">
-            {/* Search Input conditional on callback */}
             {onSearchChange ? (
-              <div className="relative w-full max-w-112 hidden sm:block">
-                <span className="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant">
+              <div className="relative w-full max-w-112 hidden sm:block group">
+                <span className="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors">
                   search
                 </span>
                 <input
-                  className="w-full pl-xl pr-sm py-xs bg-surface-container-lowest border border-outline-variant rounded-full font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors min-h-10"
+                  className="w-full pl-12 pr-sm py-xs bg-surface-container-low/80 border border-outline-variant/60 rounded-2xl font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/15 transition-all min-h-11"
                   placeholder={
                     pathname === "/inventory"
                       ? "Search products, SKUs..."
@@ -197,7 +167,7 @@ export default function Shell({
                 {searchQuery && (
                   <button
                     onClick={() => onSearchChange("")}
-                    className="absolute right-sm top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface"
+                    className="absolute right-sm top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface p-1 rounded-full hover:bg-surface-container transition-colors"
                   >
                     <span className="material-symbols-outlined text-[18px]">clear</span>
                   </button>
@@ -209,25 +179,27 @@ export default function Shell({
           </div>
 
           {/* Trailing Actions */}
-          <div className="flex items-center gap-sm">
-            <button className="p-xs rounded-full text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200 relative min-w-10 min-h-10 flex items-center justify-center">
-              <span className="material-symbols-outlined">notifications</span>
-              <span className="absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span>
+          <div className="flex items-center gap-xs">
+            <button className="p-xs rounded-2xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all duration-200 relative min-w-10 min-h-10 flex items-center justify-center">
+              <span className="material-symbols-outlined text-[22px]">notifications</span>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full ring-2 ring-surface"></span>
             </button>
-            <button className="p-xs rounded-full text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200 min-w-10 min-h-10 flex items-center justify-center">
-              <span className="material-symbols-outlined">help</span>
+            <button className="p-xs rounded-2xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all duration-200 min-w-10 min-h-10 flex items-center justify-center">
+              <span className="material-symbols-outlined text-[22px]">help</span>
             </button>
-            <button className="p-xs text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200 flex items-center gap-xs pl-sm pr-xs border border-outline-variant ml-xs min-h-10 rounded-full">
+            <button className="p-xs text-on-surface-variant hover:bg-surface-container-low transition-all duration-200 flex items-center gap-xs pl-sm pr-xs border border-outline-variant/60 ml-xs min-h-10 rounded-2xl">
               <span className="font-label-md text-label-md mr-xs hidden lg:block text-on-surface font-semibold">
                 Store Manager
               </span>
-              <span className="material-symbols-outlined text-[28px]">account_circle</span>
+              <div className="w-8 h-8 rounded-xl bg-linear-to-br from-primary/20 to-primary-container/20 flex items-center justify-center">
+                <span className="material-symbols-outlined text-[22px] text-primary">account_circle</span>
+              </div>
             </button>
           </div>
         </header>
 
         {/* Content Canvas */}
-        <div className="flex-1 overflow-hidden flex flex-col">
+        <div className="flex-1 overflow-hidden flex flex-col mt-sm">
           {children}
         </div>
       </div>

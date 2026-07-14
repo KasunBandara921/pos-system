@@ -144,7 +144,7 @@ export default function InventoryPage() {
     <Shell searchQuery={searchQuery} onSearchChange={setSearchQuery}>
       <main className="flex-1 p-lg overflow-y-auto bg-background flex flex-col gap-lg">
         {/* Page Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-md bg-surface-container-lowest border border-outline-variant rounded-2xl p-lg shadow-[0_12px_32px_rgba(0,0,0,0.05)]">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-md card-elevated p-lg">
           <div className="space-y-1">
             <h2 className="font-headline-lg text-headline-lg text-on-surface">Inventory Management</h2>
             <p className="font-body-md text-body-md text-on-surface-variant">
@@ -153,7 +153,7 @@ export default function InventoryPage() {
           </div>
           <button
             onClick={handleOpenAdd}
-            className="bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md py-sm px-md rounded-full flex items-center gap-xs transition-all shadow-sm active:scale-95 whitespace-nowrap min-h-11"
+            className="btn-primary font-label-md text-label-md py-sm px-md rounded-2xl flex items-center gap-xs active:scale-[0.97] whitespace-nowrap min-h-11"
           >
             <span className="material-symbols-outlined">add</span>
             Add Product
@@ -161,15 +161,15 @@ export default function InventoryPage() {
         </div>
 
         {/* Controls & Filters Bar */}
-        <div className="bg-surface border border-outline-variant rounded-2xl p-md flex flex-col lg:flex-row gap-md justify-between items-center shadow-[0_12px_32px_rgba(0,0,0,0.04)]">
+        <div className="card-surface p-md flex flex-col lg:flex-row gap-md justify-between items-center">
           {/* Filters buttons */}
           <div className="flex items-center gap-sm overflow-x-auto pb-2 lg:pb-0 w-full lg:w-auto no-scrollbar">
             <button
               onClick={() => setSelectedFilter("All")}
-              className={`px-md py-xs rounded-full font-label-md text-label-md whitespace-nowrap transition-colors border ${
+              className={`px-md py-xs rounded-2xl font-label-md text-label-md whitespace-nowrap transition-all ${
                 selectedFilter === "All"
-                  ? "bg-primary-container border-primary text-on-primary-container font-bold"
-                  : "border-outline-variant text-on-surface-variant hover:bg-surface-container-low"
+                  ? "btn-primary font-bold"
+                  : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container border border-outline-variant/40"
               } min-h-9.5`}
             >
               All Items ({stats.total})
@@ -220,10 +220,10 @@ export default function InventoryPage() {
         </div>
 
         {/* Data Table Container */}
-        <div className="bg-surface border border-outline-variant rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col">
+        <div className="card-elevated overflow-hidden flex flex-col">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-200">
-              <thead className="bg-surface-container-low border-b border-outline-variant font-label-md text-label-md text-on-surface-variant">
+              <thead className="bg-surface-container-low/80 border-b border-outline-variant/60 font-label-md text-label-md text-on-surface-variant">
                 <tr>
                   <th className="p-md font-semibold">Product Details</th>
                   <th className="p-md font-semibold">SKU</th>
