@@ -46,9 +46,6 @@ export default function Shell({
               <h1 className="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed leading-tight">
                 Lewdeniya Stores
               </h1>
-              <p className="font-label-sm text-label-sm text-on-surface-variant">
-                Terminal #01
-              </p>
             </div>
           </div>
           <button
