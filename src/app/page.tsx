@@ -3,10 +3,11 @@
 import React, { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import { MOCK_PRODUCTS, CATEGORIES } from "./mockData";
-import { Product, CartItem } from "./types";
+import { Product, CartItem, TransactionItem } from "./types";
 import PaymentModal from "./components/PaymentModal";
 import Shell from "./components/Shell";
 import { getProducts, bulkDeductStock } from "./actions/products";
+import { createTransaction } from "./actions/transactions";
 import { jsPDF } from "jspdf";
 
 interface ReceiptData {
@@ -318,6 +319,14 @@ export default function CheckoutPage() {
   const handlePaymentComplete = async (paymentMethod: string, amountTendered: number) => {
     setIsPaymentModalOpen(false);
 
+    const transactionItems: TransactionItem[] = cart.map((item) => ({
+      productId: item.product.id,
+      name: item.product.name,
+      price: item.product.price,
+      quantity: item.quantity,
+      lineTotal: Number((item.product.price * item.quantity).toFixed(2)),
+    }));
+
     // Prepare items to deduct
     const itemsToDeduct = cart.map((item) => ({
       productId: item.product.id,
@@ -344,6 +353,22 @@ export default function CheckoutPage() {
 
     const orderId = `LWD-${Math.floor(100000 + Math.random() * 900000)}`;
     const changeDue = paymentMethod === "Cash" ? Math.max(0, amountTendered - total) : 0;
+
+    try {
+      await createTransaction({
+        orderId,
+        items: transactionItems,
+        subtotal,
+        tax,
+        total,
+        paymentMethod,
+        amountTendered,
+        changeDue,
+      });
+    } catch (error) {
+      console.error("Failed to save transaction:", error);
+      alert("The sale completed, but saving the transaction history failed.");
+    }
 
     // Open Success Receipt Screen
     setCompletedReceipt({

@@ -22,3 +22,16 @@ model Product {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model SaleTransaction {
+  id             String   @id @default(uuid())
+  orderId        String   @unique
+  items          Json
+  subtotal       Float
+  tax            Float
+  total          Float
+  paymentMethod  String
+  amountTendered Float
+  changeDue      Float
+  createdAt      DateTime @default(now())
+}

@@ -105,6 +105,21 @@ export default function Shell({
                 Reports
               </Link>
             </li>
+            <li>
+              <Link
+                href="/transactions"
+                className={`flex items-center gap-sm px-md py-sm rounded-2xl transition-all duration-200 min-h-11 ${
+                  pathname === "/transactions"
+                    ? "text-primary dark:text-primary-fixed-dim font-bold bg-primary-container/10 ring-1 ring-primary/20 shadow-sm"
+                    : "text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-low"
+                }`}
+              >
+                <span className={`material-symbols-outlined ${pathname === "/transactions" ? "fill" : ""}`}>
+                  receipt_long
+                </span>
+                Transactions
+              </Link>
+            </li>
           </ul>
 
           {/* Suspended Sales Section */}
