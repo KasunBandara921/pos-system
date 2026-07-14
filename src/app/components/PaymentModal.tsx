@@ -59,8 +59,8 @@ export default function PaymentModal({
     paymentMethod === "Cash" && (parseFloat(cashTendered) || 0) < totalAmount;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-sm">
-      <div className="bg-surface-container-lowest bg-white dark:bg-[#1e293b] border border-outline-variant rounded-xl shadow-xl w-full max-w-[512px] max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-sm">
+      <div className="bg-surface-container-lowest dark:bg-[#1e293b] border border-outline-variant rounded-2xl shadow-[0_24px_70px_rgba(0,0,0,0.18)] w-full max-w-128 max-h-[90vh] overflow-hidden flex flex-col animate-rise-in">
         {/* Modal Header */}
         <div className="px-lg py-md border-b border-outline-variant bg-surface flex justify-between items-center">
           <div className="flex items-center gap-sm">
@@ -69,7 +69,7 @@ export default function PaymentModal({
           </div>
           <button
             onClick={onClose}
-            className="text-on-surface-variant hover:text-on-surface p-xs rounded-full hover:bg-surface-container-low transition-colors"
+            className="text-on-surface-variant hover:text-on-surface p-xs rounded-full hover:bg-surface-container-low transition-colors min-w-10 min-h-10 flex items-center justify-center"
           >
             <span className="material-symbols-outlined">close</span>
           </button>
@@ -78,7 +78,7 @@ export default function PaymentModal({
         {/* Modal Body */}
         <div className="p-lg flex-1 overflow-y-auto flex flex-col gap-md">
           {/* Amount Due Indicator */}
-          <div className="bg-surface-container rounded-lg p-md text-center border border-outline-variant/50">
+          <div className="bg-surface-container rounded-2xl p-md text-center border border-outline-variant/50 shadow-sm">
             <p className="text-on-surface-variant font-label-md text-label-md uppercase tracking-wider mb-xs">
               Amount Due
             </p>
@@ -99,7 +99,7 @@ export default function PaymentModal({
                 <button
                   key={method.name}
                   onClick={() => setPaymentMethod(method.name)}
-                  className={`py-md px-sm rounded-lg border flex flex-col items-center gap-xs transition-all active:scale-[0.98] min-h-[80px] ${
+                  className={`py-md px-sm rounded-2xl border flex flex-col items-center gap-xs transition-all active:scale-[0.98] min-h-20 shadow-sm ${
                     paymentMethod === method.name
                       ? "bg-primary/10 border-primary text-primary font-bold"
                       : "bg-surface border-outline-variant text-on-surface-variant hover:bg-surface-container-low"
@@ -127,7 +127,7 @@ export default function PaymentModal({
                     value={cashTendered}
                     onChange={(e) => setCashTendered(e.target.value)}
                     placeholder="0.00"
-                    className="w-full bg-surface border border-outline-variant text-on-surface font-headline-md text-headline-md rounded-lg px-md py-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all min-h-[48px]"
+                    className="w-full bg-surface border border-outline-variant text-on-surface font-headline-md text-headline-md rounded-2xl px-md py-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all min-h-12"
                     autoFocus
                   />
                 </div>
@@ -135,7 +135,7 @@ export default function PaymentModal({
                   <label className="block font-label-sm text-label-sm text-on-surface-variant mb-base">
                     Change Due ($)
                   </label>
-                  <div className="w-full bg-surface border border-outline-variant text-error font-headline-md text-headline-md rounded-lg px-md py-sm min-h-[48px] flex items-center">
+                  <div className="w-full bg-surface border border-outline-variant text-error font-headline-md text-headline-md rounded-2xl px-md py-sm min-h-12 flex items-center">
                     ${changeDue.toFixed(2)}
                   </div>
                 </div>
@@ -158,7 +158,7 @@ export default function PaymentModal({
                       <button
                         key={index}
                         onClick={() => handleCashShortcut(Number(btn.val.toFixed(2)))}
-                        className="bg-surface border border-outline-variant hover:bg-surface-container-low text-on-surface font-label-md text-label-md py-xs px-md rounded-lg transition-colors min-h-[36px]"
+                        className="bg-surface border border-outline-variant hover:bg-surface-container-low text-on-surface font-label-md text-label-md py-xs px-md rounded-full transition-colors min-h-9 shadow-sm"
                       >
                         {btn.label}
                       </button>
@@ -170,7 +170,7 @@ export default function PaymentModal({
 
           {/* Card / Mobile Details Panel */}
           {paymentMethod !== "Cash" && (
-            <div className="bg-surface-container rounded-lg p-md text-center border border-outline-variant/40 animate-fade-in flex flex-col items-center justify-center gap-xs min-h-[120px]">
+            <div className="bg-surface-container rounded-2xl p-md text-center border border-outline-variant/40 animate-fade-in flex flex-col items-center justify-center gap-xs min-h-30 shadow-sm">
               <span className="material-symbols-outlined text-3xl text-primary animate-pulse">
                 {paymentMethod === "Card" ? "contactless" : "qr_code_2"}
               </span>
@@ -190,14 +190,14 @@ export default function PaymentModal({
         <div className="px-lg py-md border-t border-outline-variant bg-surface flex gap-sm">
           <button
             onClick={onClose}
-            className="flex-1 bg-surface border border-outline-variant text-on-surface-variant hover:bg-surface-container-low font-label-md text-label-md py-md rounded-lg transition-colors min-h-[48px]"
+            className="flex-1 bg-surface border border-outline-variant text-on-surface-variant hover:bg-surface-container-low font-label-md text-label-md py-md rounded-2xl transition-colors min-h-12"
           >
             Cancel
           </button>
           <button
             onClick={handleConfirm}
             disabled={isCompleteDisabled}
-            className={`flex-1 font-headline-md text-headline-md py-md rounded-lg flex items-center justify-center gap-xs transition-all shadow-sm min-h-[48px] ${
+            className={`flex-1 font-headline-md text-headline-md py-md rounded-2xl flex items-center justify-center gap-xs transition-all shadow-sm min-h-12 ${
               isCompleteDisabled
                 ? "bg-surface-container-highest text-on-surface-variant cursor-not-allowed border border-outline-variant"
                 : "bg-primary hover:bg-primary-container text-on-primary active:scale-[0.98]"
