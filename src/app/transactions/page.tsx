@@ -5,7 +5,7 @@ import type { TransactionRecord } from "../types";
 
 export const dynamic = "force-dynamic";
 
-const formatCurrency = (value: number) => `$${value.toFixed(2)}`;
+const formatCurrency = (value: number) => `Rs. ${value.toFixed(2)}`;
 
 const formatDateTime = (value: string) =>
   new Intl.DateTimeFormat("en-US", {
@@ -164,10 +164,10 @@ function TransactionRow({ transaction }: { transaction: TransactionRecord }) {
           {transaction.paymentMethod}
         </span>
       </td>
-      <td className="p-md text-right font-mono-data">${transaction.subtotal.toFixed(2)}</td>
-      <td className="p-md text-right font-mono-data">${transaction.tax.toFixed(2)}</td>
-      <td className="p-md text-right font-semibold text-primary">${transaction.total.toFixed(2)}</td>
-      <td className="p-md text-right font-mono-data">${transaction.changeDue.toFixed(2)}</td>
+      <td className="p-md text-right font-mono-data">Rs. {transaction.subtotal.toFixed(2)}</td>
+      <td className="p-md text-right font-mono-data">Rs. {transaction.tax.toFixed(2)}</td>
+      <td className="p-md text-right font-semibold text-primary">Rs. {transaction.total.toFixed(2)}</td>
+      <td className="p-md text-right font-mono-data">Rs. {transaction.changeDue.toFixed(2)}</td>
     </tr>
   );
 }

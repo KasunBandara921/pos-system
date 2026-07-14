@@ -296,7 +296,7 @@ export default function InventoryPage() {
 
                         {/* Price */}
                         <td className="p-md text-right font-semibold">
-                          ${product.price.toFixed(2)}
+                          Rs. {product.price.toFixed(2)}
                         </td>
 
                         {/* Quantity (Stock) */}

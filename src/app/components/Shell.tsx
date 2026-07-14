@@ -138,7 +138,7 @@ export default function Shell({
                       className="text-left w-full p-sm rounded-2xl border border-outline-variant bg-surface hover:bg-surface-container flex items-center justify-between text-xs transition-all shadow-sm"
                     >
                       <span className="truncate text-on-surface">Order #{index + 1}</span>
-                      <span className="font-mono text-primary font-bold">${scTotal.toFixed(2)}</span>
+                      <span className="font-mono text-primary font-bold">Rs. {scTotal.toFixed(2)}</span>
                     </button>
                   );
                 })}

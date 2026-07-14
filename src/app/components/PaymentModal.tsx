@@ -83,7 +83,7 @@ export default function PaymentModal({
               Amount Due
             </p>
             <p className="font-display-price text-display-price text-primary font-bold">
-              ${totalAmount.toFixed(2)}
+              Rs. {totalAmount.toFixed(2)}
             </p>
           </div>
 
@@ -118,7 +118,7 @@ export default function PaymentModal({
               <div className="grid grid-cols-2 gap-md">
                 <div>
                   <label className="block font-label-sm text-label-sm text-on-surface-variant mb-base">
-                    Cash Tendered ($)
+                    Cash Tendered (Rs)
                   </label>
                   <input
                     type="number"
@@ -133,10 +133,10 @@ export default function PaymentModal({
                 </div>
                 <div>
                   <label className="block font-label-sm text-label-sm text-on-surface-variant mb-base">
-                    Change Due ($)
+                    Change Due (Rs)
                   </label>
                   <div className="w-full bg-surface border border-outline-variant text-error font-headline-md text-headline-md rounded-2xl px-md py-sm min-h-12 flex items-center">
-                    ${changeDue.toFixed(2)}
+                    Rs. {changeDue.toFixed(2)}
                   </div>
                 </div>
               </div>
@@ -147,11 +147,11 @@ export default function PaymentModal({
                 <div className="flex flex-wrap gap-xs">
                   {[
                     { label: "Exact", val: totalAmount },
-                    { label: "$5.00", val: 5 },
-                    { label: "$10.00", val: 10 },
-                    { label: "$20.00", val: 20 },
-                    { label: "$50.00", val: 50 },
-                    { label: "$100.00", val: 100 },
+                    { label: "Rs. 5", val: 5 },
+                    { label: "Rs. 10", val: 10 },
+                    { label: "Rs. 20", val: 20 },
+                    { label: "Rs. 50", val: 50 },
+                    { label: "Rs. 100", val: 100 },
                   ]
                     .filter((btn) => btn.val >= totalAmount || btn.label === "Exact")
                     .map((btn, index) => (

@@ -86,8 +86,8 @@ const downloadPDFReceipt = (receipt: ReceiptData | null) => {
     }
     doc.text(name, 5, y);
     doc.text(`${item.quantity}`, 45, y, { align: "right" });
-    doc.text(`$${item.product.price.toFixed(2)}`, 58, y, { align: "right" });
-    doc.text(`$${(item.product.price * item.quantity).toFixed(2)}`, 75, y, { align: "right" });
+    doc.text(`Rs. ${item.product.price.toFixed(2)}`, 58, y, { align: "right" });
+    doc.text(`Rs. ${(item.product.price * item.quantity).toFixed(2)}`, 75, y, { align: "right" });
     y += 5.5;
   });
 
@@ -98,17 +98,17 @@ const downloadPDFReceipt = (receipt: ReceiptData | null) => {
 
   // Totals
   doc.text("Subtotal:", 45, y, { align: "right" });
-  doc.text(`$${receipt.subtotal.toFixed(2)}`, 75, y, { align: "right" });
+  doc.text(`Rs. ${receipt.subtotal.toFixed(2)}`, 75, y, { align: "right" });
   y += 3.5;
 
   doc.text("Tax (8.5%):", 45, y, { align: "right" });
-  doc.text(`$${receipt.tax.toFixed(2)}`, 75, y, { align: "right" });
+  doc.text(`Rs. ${receipt.tax.toFixed(2)}`, 75, y, { align: "right" });
   y += 4.5;
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
   doc.text("Total Amount:", 45, y, { align: "right" });
-  doc.text(`$${receipt.total.toFixed(2)}`, 75, y, { align: "right" });
+  doc.text(`Rs. ${receipt.total.toFixed(2)}`, 75, y, { align: "right" });
   y += 5.5;
 
   // Divider
@@ -125,12 +125,12 @@ const downloadPDFReceipt = (receipt: ReceiptData | null) => {
 
   if (receipt.paymentMethod === "Cash") {
     doc.text("Amount Tendered:", 5, y);
-    doc.text(`$${receipt.amountTendered.toFixed(2)}`, 75, y, { align: "right" });
+    doc.text(`Rs. ${receipt.amountTendered.toFixed(2)}`, 75, y, { align: "right" });
     y += 3.5;
 
     doc.setFont("helvetica", "bold");
     doc.text("Change Returned:", 5, y);
-    doc.text(`$${receipt.changeDue.toFixed(2)}`, 75, y, { align: "right" });
+    doc.text(`Rs. ${receipt.changeDue.toFixed(2)}`, 75, y, { align: "right" });
     y += 4.5;
   }
 
@@ -416,22 +416,22 @@ export default function CheckoutPage() {
                     <span className="text-on-surface-variant truncate max-w-55">
                       {item.product.name} <span className="text-xs text-on-surface-variant">x{item.quantity}</span>
                     </span>
-                    <span className="font-mono text-on-surface">${(item.product.price * item.quantity).toFixed(2)}</span>
+                    <span className="font-mono text-on-surface">Rs. {(item.product.price * item.quantity).toFixed(2)}</span>
                   </div>
                 ))}
               </div>
               <div className="border-t border-outline-variant/30 pt-xs flex flex-col gap-1 text-xs">
                 <div className="flex justify-between text-on-surface-variant">
                   <span>Subtotal</span>
-                  <span>${completedReceipt.subtotal.toFixed(2)}</span>
+                  <span>Rs. {completedReceipt.subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-on-surface-variant">
                   <span>Tax (8.5%)</span>
-                  <span>${completedReceipt.tax.toFixed(2)}</span>
+                  <span>Rs. {completedReceipt.tax.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between font-bold text-sm text-on-surface mt-xs">
                   <span>Total Amount</span>
-                  <span className="text-primary">${completedReceipt.total.toFixed(2)}</span>
+                  <span className="text-primary">Rs. {completedReceipt.total.toFixed(2)}</span>
                 </div>
               </div>
               <div className="border-t border-outline-variant/30 pt-xs text-xs text-on-surface-variant flex flex-col gap-1">
@@ -443,11 +443,11 @@ export default function CheckoutPage() {
                   <>
                     <div className="flex justify-between">
                       <span>Amount Tendered</span>
-                      <span>${completedReceipt.amountTendered.toFixed(2)}</span>
+                      <span>Rs. {completedReceipt.amountTendered.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between font-bold text-on-surface">
                       <span>Change Returned</span>
-                      <span>${completedReceipt.changeDue.toFixed(2)}</span>
+                      <span>Rs. {completedReceipt.changeDue.toFixed(2)}</span>
                     </div>
                   </>
                 )}
@@ -548,7 +548,7 @@ export default function CheckoutPage() {
                         </h3>
                         <div className="mt-1 flex items-end justify-between gap-sm">
                           <span className="font-headline-md text-headline-md text-primary font-bold leading-none">
-                            ${product.price.toFixed(2)}
+                            Rs. {product.price.toFixed(2)}
                           </span>
                           <span className="text-xs text-on-surface-variant whitespace-nowrap">{product.unit}</span>
                         </div>
@@ -609,7 +609,7 @@ export default function CheckoutPage() {
                         {item.product.name}
                       </h4>
                       <p className="font-mono-data text-on-surface-variant text-sm">
-                        ${item.product.price.toFixed(2)}/ea
+                        Rs. {item.product.price.toFixed(2)}/ea
                       </p>
                     </div>
 
@@ -634,7 +634,7 @@ export default function CheckoutPage() {
 
                     {/* Item Subtotal */}
                     <div className="w-16 text-right font-headline-md text-headline-md text-on-surface font-semibold">
-                      ${(item.product.price * item.quantity).toFixed(2)}
+                      Rs. {(item.product.price * item.quantity).toFixed(2)}
                     </div>
                   </div>
                 ))
@@ -652,15 +652,15 @@ export default function CheckoutPage() {
               <div className="flex flex-col gap-2 mb-md">
                 <div className="flex justify-between items-center text-on-surface-variant font-body-md text-body-md">
                   <span>Subtotal</span>
-                  <span className="font-mono-data">${subtotal.toFixed(2)}</span>
+                  <span className="font-mono-data">Rs. {subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center text-on-surface-variant font-body-md text-body-md">
                   <span>Tax (8.5%)</span>
-                  <span className="font-mono-data">${tax.toFixed(2)}</span>
+                  <span className="font-mono-data">Rs. {tax.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center text-on-surface font-headline-lg mt-sm border-t border-outline-variant pt-sm font-bold">
                   <span>Total</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>Rs. {total.toFixed(2)}</span>
                 </div>
               </div>
 

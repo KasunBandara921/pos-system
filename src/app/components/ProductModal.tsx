@@ -200,7 +200,7 @@ export default function ProductModal({
           <div className="grid grid-cols-3 gap-md">
             <div>
               <label className="block font-label-sm text-label-sm text-on-surface-variant mb-base">
-                Price ($) *
+                Price (Rs) *
               </label>
               <input
                 type="number"
