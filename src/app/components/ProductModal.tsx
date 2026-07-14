@@ -93,14 +93,16 @@ export default function ProductModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-sm">
-      <div className="bg-surface-container-lowest dark:bg-[#1e293b] border border-outline-variant rounded-2xl shadow-[0_24px_70px_rgba(0,0,0,0.18)] w-full max-w-128 max-h-[90vh] overflow-hidden flex flex-col animate-rise-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-md p-sm">
+      <div className="glass-panel rounded-3xl shadow-[0_32px_80px_rgba(15,23,42,0.2)] w-full max-w-128 max-h-[90vh] overflow-hidden flex flex-col animate-rise-in">
         {/* Modal Header */}
-        <div className="px-lg py-md border-b border-outline-variant bg-surface flex justify-between items-center">
+        <div className="px-lg py-md border-b border-outline-variant/60 flex justify-between items-center">
           <div className="flex items-center gap-sm">
-            <span className="material-symbols-outlined text-primary text-2xl">
-              {product ? "edit_note" : "add_box"}
-            </span>
+            <div className="w-10 h-10 rounded-2xl bg-linear-to-br from-primary/15 to-primary-container/15 flex items-center justify-center">
+              <span className="material-symbols-outlined text-primary text-xl">
+                {product ? "edit_note" : "add_box"}
+              </span>
+            </div>
             <h2 className="font-headline-md text-headline-md text-on-surface">
               {product ? "Edit Product Details" : "Add New Product"}
             </h2>
@@ -126,7 +128,7 @@ export default function ProductModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Organic Honey 500g"
-              className="w-full bg-surface border border-outline-variant text-on-surface font-body-md text-body-md rounded-2xl px-sm py-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all min-h-10"
+              className="w-full bg-surface-container-low border border-outline-variant/60 text-on-surface font-body-md text-body-md rounded-2xl px-sm py-xs focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary/50 transition-all min-h-10"
             />
           </div>
 
@@ -142,7 +144,7 @@ export default function ProductModal({
                 value={sku}
                 onChange={(e) => setSku(e.target.value)}
                 placeholder="e.g. HON-ORG-005"
-                className="w-full bg-surface border border-outline-variant text-on-surface font-body-md text-body-md rounded-2xl px-sm py-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all min-h-10"
+                className="w-full bg-surface-container-low border border-outline-variant/60 text-on-surface font-body-md text-body-md rounded-2xl px-sm py-xs focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary/50 transition-all min-h-10"
               />
             </div>
             <div>
@@ -155,7 +157,7 @@ export default function ProductModal({
                 value={supplier}
                 onChange={(e) => setSupplier(e.target.value)}
                 placeholder="Supplier Name"
-                className="w-full bg-surface border border-outline-variant text-on-surface font-body-md text-body-md rounded-2xl px-sm py-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all min-h-10"
+                className="w-full bg-surface-container-low border border-outline-variant/60 text-on-surface font-body-md text-body-md rounded-2xl px-sm py-xs focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary/50 transition-all min-h-10"
               />
             </div>
           </div>
@@ -169,7 +171,7 @@ export default function ProductModal({
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-surface border border-outline-variant text-on-surface font-body-md text-body-md rounded-2xl px-sm py-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all min-h-10"
+                className="w-full bg-surface-container-low border border-outline-variant/60 text-on-surface font-body-md text-body-md rounded-2xl px-sm py-xs focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary/50 transition-all min-h-10"
               >
                 {CATEGORIES.filter((c) => c !== "All Items").map((cat) => (
                   <option key={cat} value={cat}>
@@ -185,7 +187,7 @@ export default function ProductModal({
               <select
                 value={icon}
                 onChange={(e) => setIcon(e.target.value)}
-                className="w-full bg-surface border border-outline-variant text-on-surface font-body-md text-body-md rounded-2xl px-sm py-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all min-h-10"
+                className="w-full bg-surface-container-low border border-outline-variant/60 text-on-surface font-body-md text-body-md rounded-2xl px-sm py-xs focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary/50 transition-all min-h-10"
               >
                 {COMMON_ICONS.map((i) => (
                   <option key={i} value={i}>
@@ -210,7 +212,7 @@ export default function ProductModal({
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 placeholder="0.00"
-                className="w-full bg-surface border border-outline-variant text-on-surface font-body-md text-body-md rounded-2xl px-sm py-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all min-h-10"
+                className="w-full bg-surface-container-low border border-outline-variant/60 text-on-surface font-body-md text-body-md rounded-2xl px-sm py-xs focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary/50 transition-all min-h-10"
               />
             </div>
             <div>
@@ -220,7 +222,7 @@ export default function ProductModal({
               <select
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
-                className="w-full bg-surface border border-outline-variant text-on-surface font-body-md text-body-md rounded-2xl px-sm py-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all min-h-10"
+                className="w-full bg-surface-container-low border border-outline-variant/60 text-on-surface font-body-md text-body-md rounded-2xl px-sm py-xs focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary/50 transition-all min-h-10"
               >
                 <option value="/ea">/ea (Each)</option>
                 <option value="/kg">/kg (Kilogram)</option>
@@ -239,7 +241,7 @@ export default function ProductModal({
                 value={stock}
                 onChange={(e) => setStock(e.target.value)}
                 placeholder="0"
-                className="w-full bg-surface border border-outline-variant text-on-surface font-body-md text-body-md rounded-2xl px-sm py-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all min-h-10"
+                className="w-full bg-surface-container-low border border-outline-variant/60 text-on-surface font-body-md text-body-md rounded-2xl px-sm py-xs focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary/50 transition-all min-h-10"
               />
             </div>
           </div>
@@ -254,23 +256,23 @@ export default function ProductModal({
               value={image}
               onChange={(e) => setImage(e.target.value)}
               placeholder="https://example.com/image.png"
-              className="w-full bg-surface border border-outline-variant text-on-surface font-body-md text-body-md rounded-2xl px-sm py-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all min-h-10"
+              className="w-full bg-surface-container-low border border-outline-variant/60 text-on-surface font-body-md text-body-md rounded-2xl px-sm py-xs focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary/50 transition-all min-h-10"
             />
           </div>
         </form>
 
         {/* Modal Footer */}
-        <div className="px-lg py-md border-t border-outline-variant bg-surface flex gap-sm">
+        <div className="px-lg py-md border-t border-outline-variant/60 flex gap-sm">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 bg-surface border border-outline-variant text-on-surface-variant hover:bg-surface-container-low font-label-md text-label-md py-sm rounded-2xl transition-colors min-h-10"
+            className="flex-1 bg-surface-container-low border border-outline-variant/60 text-on-surface-variant hover:bg-surface-container font-label-md text-label-md py-sm rounded-2xl transition-colors min-h-10"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            className="flex-1 bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md py-sm rounded-2xl flex items-center justify-center gap-xs transition-colors shadow-sm min-h-10"
+            className="flex-1 btn-primary font-label-md text-label-md py-sm rounded-2xl flex items-center justify-center gap-xs transition-colors min-h-10 active:scale-[0.98]"
           >
             <span className="material-symbols-outlined text-[18px]">save</span>
             Save Details

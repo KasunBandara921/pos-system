@@ -397,9 +397,9 @@ export default function CheckoutPage() {
       {completedReceipt ? (
         /* Checkout Completion Receipt Success Screen */
         <main className="flex-1 overflow-y-auto flex items-center justify-center p-lg">
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.08)] w-full max-w-124 p-lg animate-fade-in text-center flex flex-col gap-md">
-            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mx-auto shadow-sm">
-              <span className="material-symbols-outlined text-4xl">check_circle</span>
+          <div className="card-elevated w-full max-w-124 p-lg animate-rise-in text-center flex flex-col gap-md">
+            <div className="w-20 h-20 bg-linear-to-br from-primary/15 to-primary-container/15 rounded-3xl flex items-center justify-center text-primary mx-auto shadow-[0_8px_24px_rgba(5,150,105,0.15)]">
+              <span className="material-symbols-outlined text-5xl fill">check_circle</span>
             </div>
             <div>
               <h2 className="font-headline-md text-headline-md text-on-surface font-bold">Payment Success!</h2>
@@ -458,14 +458,14 @@ export default function CheckoutPage() {
             <div className="flex gap-sm">
               <button
                 onClick={() => downloadPDFReceipt(completedReceipt)}
-                className="flex-1 bg-surface border border-outline-variant text-on-surface hover:bg-surface-container-low font-label-md text-label-md py-sm rounded-2xl flex items-center justify-center gap-xs min-h-11"
+                className="flex-1 bg-surface border border-outline-variant/60 text-on-surface hover:bg-surface-container-low font-label-md text-label-md py-sm rounded-2xl flex items-center justify-center gap-xs min-h-11 transition-all hover:shadow-sm"
               >
                 <span className="material-symbols-outlined text-sm">download</span>
                 Download PDF
               </button>
               <button
                 onClick={handleNewSale}
-                className="flex-1 bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md py-sm rounded-2xl flex items-center justify-center gap-xs min-h-11"
+                className="flex-1 btn-primary font-label-md text-label-md py-sm rounded-2xl flex items-center justify-center gap-xs min-h-11 active:scale-[0.98]"
               >
                 <span className="material-symbols-outlined text-sm">fiber_new</span>
                 New Order
@@ -477,18 +477,18 @@ export default function CheckoutPage() {
         /* Normal Dashboard Flow */
         <main className="flex-1 overflow-hidden flex p-sm gap-md">
           {/* Catalog Grid Area */}
-          <section className="flex-1 flex flex-col h-full bg-surface-container-lowest rounded-2xl border border-outline-variant overflow-hidden shadow-[0_16px_48px_rgba(0,0,0,0.06)]">
+          <section className="flex-1 flex flex-col h-full card-elevated overflow-hidden">
             {/* Category tabs scroll */}
-            <div className="px-md py-sm border-b border-outline-variant bg-surface/95 backdrop-blur-sm">
-              <div className="flex overflow-x-auto no-scrollbar gap-sm pb-1">
+            <div className="px-md py-sm border-b border-outline-variant/60 bg-surface-container-low/50 backdrop-blur-sm">
+              <div className="flex overflow-x-auto no-scrollbar gap-xs pb-1">
                 {CATEGORIES.map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`px-md py-xs rounded-full font-label-md text-label-md whitespace-nowrap min-h-11 transition-all border shadow-sm ${
+                    className={`px-md py-xs rounded-2xl font-label-md text-label-md whitespace-nowrap min-h-10 transition-all ${
                       selectedCategory === cat
-                        ? "bg-secondary-container border-secondary-container text-on-secondary-container font-bold"
-                        : "border-outline-variant text-on-surface-variant hover:bg-surface-container-low"
+                        ? "btn-primary font-bold shadow-[0_4px_12px_rgba(5,150,105,0.25)]"
+                        : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface border border-transparent hover:border-outline-variant/40"
                     }`}
                   >
                     {cat}
@@ -513,29 +513,29 @@ export default function CheckoutPage() {
                     <div
                       key={product.id}
                       onClick={() => handleAddToCart(product)}
-                      className="bg-surface rounded-2xl border border-outline-variant overflow-hidden hover:shadow-[0_14px_30px_rgba(0,0,0,0.08)] transition-all cursor-pointer active:scale-[0.985] group flex flex-col justify-between"
+                      className="bg-surface rounded-2xl border border-outline-variant/50 overflow-hidden hover:shadow-[0_16px_40px_rgba(15,23,42,0.1)] hover:border-primary/20 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer active:scale-[0.98] group flex flex-col justify-between"
                     >
                       {/* Image container */}
-                      <div className="aspect-square bg-surface-container relative flex items-center justify-center overflow-hidden">
+                      <div className="aspect-square bg-linear-to-br from-surface-container-low to-surface-container relative flex items-center justify-center overflow-hidden">
                         {product.image ? (
                           <img
                             alt={product.name}
-                            className="w-full h-full object-cover mix-blend-multiply opacity-90 group-hover:opacity-100 transition-opacity duration-300"
+                            className="w-full h-full object-cover opacity-95 group-hover:scale-105 transition-transform duration-500"
                             src={product.image}
                           />
                         ) : (
-                          <div className="w-full h-full bg-linear-to-br from-tertiary-fixed to-surface-container rounded-md flex items-center justify-center border border-outline-variant/30 p-md">
-                            <span className="material-symbols-outlined text-4xl text-tertiary">
+                          <div className="w-full h-full bg-linear-to-br from-primary/5 to-primary-container/10 flex items-center justify-center p-md">
+                            <span className="material-symbols-outlined text-4xl text-primary/60 group-hover:text-primary transition-colors">
                               {product.icon || "shopping_bag"}
                             </span>
                           </div>
                         )}
-                        <div className={`absolute top-xs right-xs px-2 py-1 rounded text-xs font-mono-data font-medium border ${
+                        <div className={`absolute top-xs right-xs px-2.5 py-1 rounded-full text-xs font-label-sm backdrop-blur-sm ${
                           availableStock > 10 
-                            ? "bg-surface-container-highest text-on-surface-variant border-outline-variant"
+                            ? "bg-surface/90 text-on-surface-variant border border-outline-variant/50"
                             : availableStock > 0 
-                              ? "bg-warning-container text-on-warning-container border-amber-300"
-                              : "bg-error-container text-on-error-container border-red-300"
+                              ? "bg-warning-container/95 text-on-warning-container border border-amber-200/60"
+                              : "bg-error-container/95 text-on-error-container border border-red-200/60"
                         }`}>
                           {availableStock > 0 ? `${availableStock} In Stock` : "Out of Stock"}
                         </div>
@@ -566,10 +566,13 @@ export default function CheckoutPage() {
           </section>
 
           {/* Cart Panel Area */}
-          <section className="w-1/3 min-w-80 max-w-112 flex flex-col bg-surface-container-lowest rounded-2xl border border-outline-variant shadow-[0_16px_48px_rgba(0,0,0,0.06)] overflow-hidden">
+          <section className="w-1/3 min-w-80 max-w-112 flex flex-col card-elevated overflow-hidden">
             {/* Cart Header */}
-            <div className="px-lg py-md border-b border-outline-variant bg-surface/95 backdrop-blur-sm flex justify-between items-center">
-              <h2 className="font-headline-md text-headline-md text-on-surface font-bold">Current Order</h2>
+            <div className="px-lg py-md border-b border-outline-variant/60 bg-linear-to-r from-primary/5 to-transparent flex justify-between items-center">
+              <div className="flex items-center gap-xs">
+                <span className="material-symbols-outlined text-primary fill">shopping_cart</span>
+                <h2 className="font-headline-md text-headline-md text-on-surface font-bold">Current Order</h2>
+              </div>
               {cart.length > 0 && (
                 <button
                   onClick={handleClearCart}
@@ -586,7 +589,7 @@ export default function CheckoutPage() {
                 cart.map((item) => (
                   <div
                     key={item.product.id}
-                    className="flex items-center gap-md p-sm bg-surface rounded-2xl border border-outline-variant animate-fade-in shadow-sm"
+                    className="flex items-center gap-md p-sm bg-surface-container-low rounded-2xl border border-outline-variant/40 animate-fade-in hover:border-primary/20 transition-colors"
                   >
                     {/* Thumbnail */}
                     <div className="w-12 h-12 bg-surface-container rounded-2xl shrink-0 flex items-center justify-center overflow-hidden">
@@ -648,7 +651,7 @@ export default function CheckoutPage() {
             </div>
 
             {/* Pricing & Checkout Actions */}
-            <div className="bg-surface-container-lowest border-t border-outline-variant p-lg">
+            <div className="bg-surface border-t border-outline-variant/60 p-lg">
               <div className="flex flex-col gap-2 mb-md">
                 <div className="flex justify-between items-center text-on-surface-variant font-body-md text-body-md">
                   <span>Subtotal</span>
@@ -658,19 +661,19 @@ export default function CheckoutPage() {
                   <span>Tax (8.5%)</span>
                   <span className="font-mono-data">Rs. {tax.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between items-center text-on-surface font-headline-lg mt-sm border-t border-outline-variant pt-sm font-bold">
-                  <span>Total</span>
-                  <span>Rs. {total.toFixed(2)}</span>
+                <div className="flex justify-between items-center text-on-surface mt-sm border-t border-outline-variant/50 pt-sm">
+                  <span className="font-headline-md text-headline-md font-bold">Total</span>
+                  <span className="font-display-price text-[28px] gradient-text">Rs. {total.toFixed(2)}</span>
                 </div>
               </div>
 
               <button
                 disabled={cart.length === 0}
                 onClick={() => setIsPaymentModalOpen(true)}
-                className={`w-full font-headline-md text-headline-md py-md rounded-2xl flex items-center justify-center gap-sm transition-all shadow-sm min-h-16 ${
+                className={`w-full font-headline-md text-headline-md py-md rounded-2xl flex items-center justify-center gap-sm transition-all min-h-16 ${
                   cart.length === 0
-                    ? "bg-surface-container-highest text-on-surface-variant border border-outline-variant cursor-not-allowed"
-                    : "bg-primary hover:bg-primary-container text-on-primary active:scale-[0.98]"
+                    ? "bg-surface-container-highest text-on-surface-variant border border-outline-variant/60 cursor-not-allowed"
+                    : "btn-primary active:scale-[0.98]"
                 }`}
               >
                 <span className="material-symbols-outlined text-2xl">payments</span>
