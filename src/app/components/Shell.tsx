@@ -255,15 +255,21 @@ export default function Shell({
         {/* Footer Links */}
         <div className="p-sm border-t border-outline-variant/60">
           <ul className="space-y-1 font-body-md text-body-md">
-            <li>
-              <Link
-                href="#"
-                className="flex items-center gap-sm px-md py-sm rounded-2xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors duration-200 min-h-11"
-              >
-                <span className="material-symbols-outlined text-[22px]">settings</span>
-                {t("settings")}
-              </Link>
-            </li>
+            {role === "manager" && (
+              <li>
+                <Link
+                  href="/settings"
+                  className={`flex items-center gap-sm px-md py-sm rounded-2xl transition-all duration-200 min-h-11 ${
+                    pathname === "/settings"
+                      ? "nav-active"
+                      : "text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface"
+                  }`}
+                >
+                  <span className={`material-symbols-outlined text-[22px] ${pathname === "/settings" ? "fill" : ""}`}>settings</span>
+                  {t("settings")}
+                </Link>
+              </li>
+            )}
              <li>
               <button
                 onClick={handleLogout}

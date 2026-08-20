@@ -50,3 +50,23 @@ model SaleTransaction {
   cashierName    String?
   createdAt      DateTime @default(now())
 }
+
+model SystemSetting {
+  id                    String   @id @default("default")
+  taxRate               Float    @default(8.5)
+  spendingLimitEnabled  Boolean  @default(false)
+  spendingLimit         Float    @default(5000.0)
+  spendingDiscountType  String   @default("percentage") // "percentage" or "fixed"
+  spendingDiscountValue Float    @default(5.0)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model SpendingDiscountRule {
+  id            String   @id @default(uuid())
+  minSubtotal   Float    @unique // spending threshold
+  discountType  String   // "percentage" or "fixed"
+  discountValue Float
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

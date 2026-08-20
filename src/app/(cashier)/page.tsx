@@ -12,6 +12,7 @@ import { jsPDF } from "jspdf";
 import { useLanguage } from "../context/LanguageContext";
 import DiscountModal from "../components/DiscountModal";
 import ManagerOverrideModal from "../components/ManagerOverrideModal";
+import { getSystemSettings } from "../actions/settings";
 
 interface ReceiptData {
   orderId: string;
@@ -19,6 +20,7 @@ interface ReceiptData {
   subtotal: number;
   discountAmount?: number;
   tax: number;
+  taxRate?: number;
   total: number;
   paymentMethod: string;
   amountTendered: number;
@@ -111,7 +113,8 @@ const downloadPDFReceipt = (receipt: ReceiptData | null) => {
     y += 3.5;
   }
 
-  doc.text("Tax (8.5%):", 45, y, { align: "right" });
+  const tr = receipt.taxRate !== undefined ? receipt.taxRate : 8.5;
+  doc.text(`Tax (${tr}%):`, 45, y, { align: "right" });
   doc.text(`Rs. ${receipt.tax.toFixed(2)}`, 75, y, { align: "right" });
   y += 4.5;
 
@@ -211,18 +214,28 @@ export default function CheckoutPage() {
   const [suspendedCarts, setSuspendedCarts] = useState<CartItem[][]>([]);
   
   // Completed Receipt state to display success receipt screen
-  const [completedReceipt, setCompletedReceipt] = useState<{
-    orderId: string;
-    items: CartItem[];
-    subtotal: number;
-    discountAmount?: number;
-    tax: number;
-    total: number;
-    paymentMethod: string;
-    amountTendered: number;
-    changeDue: number;
-    timestamp: string;
-  } | null>(null);
+  const [completedReceipt, setCompletedReceipt] = useState<ReceiptData | null>(null);
+
+  // System Settings state
+  const [systemSettings, setSystemSettings] = useState({
+    taxRate: 8.5,
+    spendingLimitEnabled: false,
+    spendingLimit: 5000.0,
+    spendingDiscountType: "percentage",
+    spendingDiscountValue: 5.0,
+  });
+
+  useEffect(() => {
+    async function fetchSettings() {
+      try {
+        const settings = await getSystemSettings();
+        setSystemSettings(settings);
+      } catch (err) {
+        console.error("Failed to load settings in checkout page:", err);
+      }
+    }
+    fetchSettings();
+  }, []);
 
   // Search & Category filter logic
   const filteredProducts = useMemo(() => {
@@ -250,13 +263,29 @@ export default function CheckoutPage() {
     }
   }, [subtotal, discountType, discountValue]);
 
+  // Automatic threshold spending limit discount
+  const spendingDiscountAmount = useMemo(() => {
+    if (!systemSettings.spendingLimitEnabled || subtotal < systemSettings.spendingLimit) {
+      return 0;
+    }
+    if (systemSettings.spendingDiscountType === "percentage") {
+      return Number(((subtotal * systemSettings.spendingDiscountValue) / 100).toFixed(2));
+    } else {
+      return Math.min(subtotal, systemSettings.spendingDiscountValue);
+    }
+  }, [subtotal, systemSettings]);
+
+  const totalDiscountAmount = useMemo(() => {
+    return Math.min(subtotal, discountAmount + spendingDiscountAmount);
+  }, [subtotal, discountAmount, spendingDiscountAmount]);
+
   const taxableAmount = useMemo(() => {
-    return Math.max(0, subtotal - discountAmount);
-  }, [subtotal, discountAmount]);
+    return Math.max(0, subtotal - totalDiscountAmount);
+  }, [subtotal, totalDiscountAmount]);
 
   const tax = useMemo(() => {
-    return Number((taxableAmount * 0.085).toFixed(2));
-  }, [taxableAmount]);
+    return Number((taxableAmount * (systemSettings.taxRate / 100)).toFixed(2));
+  }, [taxableAmount, systemSettings.taxRate]);
 
   const total = useMemo(() => {
     return Number((taxableAmount + tax).toFixed(2));
@@ -522,8 +551,9 @@ export default function CheckoutPage() {
       orderId,
       items: [...cart],
       subtotal,
-      discountAmount,
+      discountAmount: totalDiscountAmount,
       tax,
+      taxRate: systemSettings.taxRate,
       total,
       paymentMethod,
       amountTendered,
@@ -838,12 +868,18 @@ export default function CheckoutPage() {
                 </div>
                 {discountValue > 0 && (
                   <div className="flex justify-between items-center text-error font-body-md text-body-md animate-fade-in">
-                    <span>{language === "en" ? "Discount" : "වට්ටම"} ({discountType === "percentage" ? `${discountValue}%` : `Rs. ${discountValue.toFixed(2)}`})</span>
+                    <span>{language === "en" ? "Manual Discount" : "හස්තීය වට්ටම"} ({discountType === "percentage" ? `${discountValue}%` : `Rs. ${discountValue.toFixed(2)}`})</span>
                     <span className="font-mono-data">-Rs. {discountAmount.toFixed(2)}</span>
                   </div>
                 )}
+                {spendingDiscountAmount > 0 && (
+                  <div className="flex justify-between items-center text-error font-body-md text-body-md animate-fade-in">
+                    <span>{language === "en" ? "Threshold Discount" : "සීමා වට්ටම"} ({systemSettings.spendingDiscountType === "percentage" ? `${systemSettings.spendingDiscountValue}%` : `Rs. ${systemSettings.spendingDiscountValue.toFixed(2)}`})</span>
+                    <span className="font-mono-data">-Rs. {spendingDiscountAmount.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between items-center text-on-surface-variant font-body-md text-body-md">
-                  <span>{t("tax")}</span>
+                  <span>{language === "en" ? `Tax (${systemSettings.taxRate}%)` : `බදු (${systemSettings.taxRate}%)`}</span>
                   <span className="font-mono-data">Rs. {tax.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center text-on-surface mt-sm border-t border-outline-variant/50 pt-sm">
