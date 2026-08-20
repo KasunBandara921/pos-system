@@ -186,3 +186,76 @@ export async function getActiveProfiles(): Promise<SafeUser[]> {
     return [];
   }
 }
+
+// Register a new cashier or manager securely
+export async function createUser(
+  nameInput: string,
+  usernameInput: string,
+  passwordInput: string,
+  pinInput: string,
+  roleInput: string
+): Promise<{ success: boolean; error?: string }> {
+  const prisma = db as any;
+  try {
+    const existing = await prisma.user.findUnique({
+      where: { username: usernameInput.toLowerCase().trim() },
+    });
+
+    if (existing) {
+      return { success: false, error: "Username is already taken." };
+    }
+
+    await prisma.user.create({
+      data: {
+        name: nameInput.trim(),
+        username: usernameInput.toLowerCase().trim(),
+        password: hashString(passwordInput),
+        pin: hashString(pinInput),
+        role: roleInput,
+      },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to create user:", error);
+    return { success: false, error: "Database error during user creation." };
+  }
+}
+
+// Remove a user account
+export async function deleteUser(
+  userId: string
+): Promise<{ success: boolean; error?: string }> {
+  const prisma = db as any;
+  try {
+    const targetUser = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!targetUser) {
+      return { success: false, error: "User not found." };
+    }
+
+    // Safety guard: Ensure we don't delete the last manager
+    if (targetUser.role === "manager") {
+      const managerCount = await prisma.user.count({
+        where: { role: "manager" },
+      });
+      if (managerCount <= 1) {
+        return {
+          success: false,
+          error: "Cannot delete the only manager in the system.",
+        };
+      }
+    }
+
+    await prisma.user.delete({
+      where: { id: userId },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to delete user:", error);
+    return { success: false, error: "Database error during user deletion." };
+  }
+}

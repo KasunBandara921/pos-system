@@ -2,6 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "../context/LanguageContext";
+import { generatePayHereHash } from "../actions/payhere";
+
+declare global {
+  interface Window {
+    payhere: any;
+  }
+}
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -20,6 +27,7 @@ export default function PaymentModal({
   const [paymentMethod, setPaymentMethod] = useState<string>("Cash");
   const [cashTendered, setCashTendered] = useState<string>("");
   const [changeDue, setChangeDue] = useState<number>(0);
+  const [isProcessingCard, setIsProcessingCard] = useState<boolean>(false);
 
   useEffect(() => {
     if (paymentMethod !== "Cash") {
@@ -48,7 +56,7 @@ export default function PaymentModal({
     setCashTendered(amount.toString());
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     const tendered = parseFloat(cashTendered) || 0;
     if (paymentMethod === "Cash" && tendered < totalAmount) {
       alert(
@@ -58,11 +66,77 @@ export default function PaymentModal({
       );
       return;
     }
+
+    if (paymentMethod === "Card") {
+      if (typeof window === "undefined" || !window.payhere) {
+        alert(
+          language === "en"
+            ? "PayHere payment gateway is loading. Please try again in a moment."
+            : "PayHere ගෙවීම් පද්ධතිය සක්‍රීය වෙමින් පවතී. කරුණාකර නැවත උත්සාහ කරන්න."
+        );
+        return;
+      }
+
+      setIsProcessingCard(true);
+      const tempOrderId = `LWD-PH-${Math.floor(100000 + Math.random() * 900000)}`;
+
+      try {
+        const hash = await generatePayHereHash(tempOrderId, totalAmount);
+
+        const payment = {
+          sandbox: true,
+          merchant_id: process.env.NEXT_PUBLIC_PAYHERE_MERCHANT_ID || "1211149",
+          return_url: window.location.origin,
+          cancel_url: window.location.origin,
+          notify_url: "https://sandbox.payhere.lk",
+          order_id: tempOrderId,
+          items: `POS Order ${tempOrderId}`,
+          amount: totalAmount.toFixed(2),
+          currency: "LKR",
+          first_name: "POS",
+          last_name: "Customer",
+          email: "support@payhere.lk",
+          phone: "0771234567",
+          address: "No. 1, Galle Road",
+          city: "Colombo",
+          country: "Sri Lanka",
+          hash: hash,
+        };
+
+        window.payhere.onCompleted = function (orderId: string) {
+          setIsProcessingCard(false);
+          onComplete("Card", totalAmount);
+        };
+
+        window.payhere.onDismissed = function () {
+          setIsProcessingCard(false);
+          alert(
+            language === "en"
+              ? "Card checkout closed by operator."
+              : "කාඩ්පත් ගෙවීම ක්‍රියාකරු විසින් අවලංගු කරන ලදී."
+          );
+        };
+
+        window.payhere.onError = function (error: string) {
+          setIsProcessingCard(false);
+          alert("PayHere Gateway Error: " + error);
+        };
+
+        window.payhere.startPayment(payment);
+
+      } catch (err) {
+        setIsProcessingCard(false);
+        alert("Failed to initialize Card payment.");
+      }
+      return;
+    }
+
     onComplete(paymentMethod, tendered);
   };
 
   const isCompleteDisabled =
-    paymentMethod === "Cash" && (parseFloat(cashTendered) || 0) < totalAmount;
+    isProcessingCard ||
+    (paymentMethod === "Cash" && (parseFloat(cashTendered) || 0) < totalAmount);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-md p-sm animate-fade-in">
@@ -186,18 +260,33 @@ export default function PaymentModal({
           {paymentMethod !== "Cash" && (
             <div className="bg-surface-container rounded-2xl p-md text-center border border-outline-variant/40 animate-fade-in flex flex-col items-center justify-center gap-xs min-h-30 shadow-sm">
               <span className="material-symbols-outlined text-3xl text-primary animate-pulse">
-                {paymentMethod === "Card" ? "contactless" : "qr_code_2"}
+                {paymentMethod === "Card" ? "credit_card" : "qr_code_2"}
               </span>
-              <p className="font-label-md text-label-md text-on-surface">
+              <p className="font-label-md text-label-md text-on-surface font-semibold">
                 {paymentMethod === "Card"
-                  ? (language === "en" ? "Waiting for credit/debit card tap..." : "ක්‍රෙඩිට්/ඩෙබිට් කාඩ් පත ටැප් කරන තෙක් රැඳී සිටී...")
+                  ? (language === "en" ? "PayHere Sandbox Checkout Gateway" : "PayHere Sandbox ගෙවීම් පද්ධතිය")
                   : (language === "en" ? "Scanning customer mobile wallet..." : "පාරිභෝගික ජංගම පසුම්බිය ස්කෑන් කරමින්...")}
               </p>
-              <p className="text-xs text-on-surface-variant">
-                {language === "en"
-                  ? "The external card reader terminal is online."
-                  : "බාහිර කාඩ්පත් කියවන පර්යන්තය සක්‍රීයයි."}
+              <p className="text-xs text-on-surface-variant max-w-sm">
+                {paymentMethod === "Card"
+                  ? (language === "en"
+                      ? "Click 'Complete Payment' below to open the secure PayHere Sandbox Card Gateway popup dialog."
+                      : "ආරක්ෂිත PayHere Sandbox Card Gateway පොප්-අප් එක විවෘත කිරීමට පහත 'ගෙවීම සම්පූර්ණ කරන්න' බොත්තම ක්ලික් කරන්න.")
+                  : (language === "en"
+                      ? "The external wallet terminal is online."
+                      : "බාහිර ජංගම පසුම්බි පර්යන්තය සක්‍රීයයි.")}
               </p>
+              {paymentMethod === "Card" && (
+                <button
+                  type="button"
+                  onClick={() => onComplete("Card", totalAmount)}
+                  className="mt-xs text-xs font-semibold text-primary hover:text-primary-container px-sm py-1 border border-primary/30 rounded-full hover:bg-primary/5 transition-all flex items-center gap-xs cursor-pointer pointer-events-auto"
+                  title="Bypass PayHere popup and complete card sale instantly"
+                >
+                  <span className="material-symbols-outlined text-sm">construction</span>
+                  {language === "en" ? "Simulate Approved (Developer Bypass)" : "සාර්ථක ගෙවීමක් ලෙස අනුකරණය කරන්න (බයිපාස්)"}
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -219,8 +308,17 @@ export default function PaymentModal({
                 : "btn-primary active:scale-[0.98]"
             }`}
           >
-            <span className="material-symbols-outlined text-xl">check_circle</span>
-            {language === "en" ? "Complete Payment" : "ගෙවීම සම්පූර්ණ කරන්න"}
+            {isProcessingCard ? (
+              <>
+                <span className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent mr-2"></span>
+                {language === "en" ? "Processing..." : "ක්‍රියාත්මක වෙමින්..."}
+              </>
+            ) : (
+              <>
+                <span className="material-symbols-outlined text-xl">check_circle</span>
+                {language === "en" ? "Complete Payment" : "ගෙවීම සම්පූර්ණ කරන්න"}
+              </>
+            )}
           </button>
         </div>
       </div>
