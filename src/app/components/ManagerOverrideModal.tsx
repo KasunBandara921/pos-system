@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useLanguage } from "../context/LanguageContext";
+import { verifyManagerPinOverride } from "../actions/auth";
 
 interface ManagerOverrideModalProps {
   isOpen: boolean;
@@ -53,17 +54,22 @@ export default function ManagerOverrideModal({
     setPin("");
   };
 
-  const verifyCredentials = (inputVal: string) => {
-    // Check PIN or admin password
-    if (inputVal === "1234" || inputVal === "admin123") {
-      onAuthorized();
-      onClose();
-    } else {
-      setError(
-        language === "en"
-          ? "Unauthorized Manager credentials."
-          : "අනුමත නොකළ කළමනාකරු අක්තපත්‍ර."
-      );
+  const verifyCredentials = async (inputVal: string) => {
+    try {
+      const res = await verifyManagerPinOverride(inputVal);
+      if (res.success) {
+        onAuthorized();
+        onClose();
+      } else {
+        setError(
+          language === "en"
+            ? res.error || "Unauthorized Manager credentials."
+            : "අනුමත නොකළ කළමනාකරු අක්තපත්‍ර."
+        );
+        setPin("");
+      }
+    } catch (err) {
+      setError("System validation error.");
       setPin("");
     }
   };

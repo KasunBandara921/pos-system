@@ -4,6 +4,8 @@ import React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useLanguage } from "../context/LanguageContext";
+import LockScreen from "./LockScreen";
+import { SafeUser } from "../actions/auth";
 
 interface ShellProps {
   children: React.ReactNode;
@@ -30,6 +32,7 @@ export default function Shell({
   const [theme, setTheme] = React.useState<"light" | "dark">("light");
   const [userLabel, setUserLabel] = React.useState("Store Manager");
   const [role, setRole] = React.useState<string | null>(null);
+  const [isLocked, setIsLocked] = React.useState(false);
 
   React.useEffect(() => {
     // Read actual state of DOM HTML class set by layout script
@@ -42,6 +45,9 @@ export default function Shell({
       router.push("/login");
     }
 
+    const locked = localStorage.getItem("isTerminalLocked") === "true";
+    setIsLocked(locked);
+
     const savedRole = localStorage.getItem("userRole");
     setRole(savedRole);
     if (savedRole === "cashier") {
@@ -50,6 +56,23 @@ export default function Shell({
       setUserLabel(t("storeManager"));
     }
   }, [router, language, t]);
+
+  const handleUnlock = (user: SafeUser) => {
+    localStorage.removeItem("isTerminalLocked");
+    localStorage.setItem("userRole", user.role);
+    localStorage.setItem("userName", user.name);
+    localStorage.setItem("userId", user.id);
+    
+    setRole(user.role);
+    if (user.role === "cashier") {
+      setUserLabel(t("storeCashier"));
+    } else if (user.role === "manager") {
+      setUserLabel(t("storeManager"));
+    }
+    
+    setIsLocked(false);
+    router.push("/");
+  };
 
   const toggleTheme = () => {
     const nextTheme = theme === "light" ? "dark" : "light";
@@ -255,6 +278,16 @@ export default function Shell({
             <button className="p-xs rounded-2xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all duration-200 min-w-10 min-h-10 flex items-center justify-center">
               <span className="material-symbols-outlined text-[22px]">help</span>
             </button>
+            <button
+              onClick={() => {
+                localStorage.setItem("isTerminalLocked", "true");
+                setIsLocked(true);
+              }}
+              className="p-xs rounded-2xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all duration-200 min-w-10 min-h-10 flex items-center justify-center cursor-pointer"
+              title={language === "en" ? "Lock Terminal" : "පර්යන්තය අගුළු ලන්න"}
+            >
+              <span className="material-symbols-outlined text-[22px]">lock</span>
+            </button>
             <button className="p-xs text-on-surface-variant hover:bg-surface-container-low transition-all duration-200 flex items-center gap-xs pl-sm pr-xs border border-outline-variant/60 ml-xs min-h-10 rounded-2xl">
               <span className="font-label-md text-label-md mr-xs hidden lg:block text-on-surface font-semibold">
                 {userLabel}
@@ -271,6 +304,13 @@ export default function Shell({
           {children}
         </div>
       </div>
+
+      {/* Numerical lock screen overlay */}
+      <LockScreen
+        isOpen={isLocked}
+        onUnlock={handleUnlock}
+        onLogout={handleLogout}
+      />
     </div>
   );
 }

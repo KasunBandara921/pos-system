@@ -23,6 +23,18 @@ model Product {
   updatedAt DateTime @updatedAt
 }
 
+model User {
+  id           String            @id @default(uuid())
+  name         String
+  username     String            @unique
+  password     String
+  pin          String
+  role         String            // "manager" or "cashier"
+  transactions SaleTransaction[]
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+}
+
 model SaleTransaction {
   id             String   @id @default(uuid())
   orderId        String   @unique
@@ -33,5 +45,8 @@ model SaleTransaction {
   paymentMethod  String
   amountTendered Float
   changeDue      Float
+  userId         String?
+  user           User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  cashierName    String?
   createdAt      DateTime @default(now())
 }
