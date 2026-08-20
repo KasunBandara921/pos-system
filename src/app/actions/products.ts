@@ -3,6 +3,7 @@
 import db from "../../lib/db";
 import { Product } from "../types";
 import { MOCK_PRODUCTS } from "../mockData";
+import { notificationEmitter } from "./notification";
 
 export async function getProducts(): Promise<Product[]> {
   try {
@@ -109,6 +110,15 @@ export async function updateProduct(id: string, productData: Omit<Product, "id">
       },
     });
 
+    if (product.stock <= 0) {
+      notificationEmitter.emit("out-of-stock", {
+        productId: product.id,
+        name: product.name,
+        sku: product.sku,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      });
+    }
+
     return {
       id: product.id,
       name: product.name,
@@ -172,6 +182,29 @@ export async function bulkDeductStock(items: { productId: string; quantity: numb
 
     if (updates.length > 0) {
       await db.$transaction(updates);
+
+      // Check which of the updated products now have <= 0 stock
+      const outOfStockProducts = await db.product.findMany({
+        where: {
+          id: {
+            in: items.map((item) => item.productId),
+          },
+          stock: {
+            lte: 0,
+          },
+        },
+      });
+
+      if (outOfStockProducts.length > 0) {
+        for (const p of outOfStockProducts) {
+          notificationEmitter.emit("out-of-stock", {
+            productId: p.id,
+            name: p.name,
+            sku: p.sku,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          });
+        }
+      }
     }
     return true;
   } catch (error) {
