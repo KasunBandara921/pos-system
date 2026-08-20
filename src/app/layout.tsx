@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import { LanguageProvider } from "./context/LanguageContext";
 
@@ -37,6 +38,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <LanguageProvider>{children}</LanguageProvider>
+        <Script src="https://www.payhere.lk/lib/payhere.js" strategy="lazyOnload" />
       </body>
     </html>
   );
