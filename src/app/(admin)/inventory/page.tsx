@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
-import Shell from "../components/Shell";
-import ProductModal from "../components/ProductModal";
-import { Product } from "../types";
-import { getProducts, createProduct, updateProduct, deleteProduct } from "../actions/products";
-import { useLanguage } from "../context/LanguageContext";
+import Shell from "../../components/Shell";
+import ProductModal from "../../components/ProductModal";
+import { Product } from "../../types";
+import { getProducts, createProduct, updateProduct, deleteProduct } from "../../actions/products";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function InventoryPage() {
   const { language, t } = useLanguage();

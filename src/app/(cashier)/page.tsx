@@ -2,19 +2,22 @@
  
 import React, { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
-import { MOCK_PRODUCTS, CATEGORIES } from "./mockData";
-import { Product, CartItem, TransactionItem } from "./types";
-import PaymentModal from "./components/PaymentModal";
-import Shell from "./components/Shell";
-import { getProducts, bulkDeductStock } from "./actions/products";
-import { createTransaction } from "./actions/transactions";
+import { MOCK_PRODUCTS, CATEGORIES } from "../mockData";
+import { Product, CartItem, TransactionItem } from "../types";
+import PaymentModal from "../components/PaymentModal";
+import Shell from "../components/Shell";
+import { getProducts, bulkDeductStock } from "../actions/products";
+import { createTransaction } from "../actions/transactions";
 import { jsPDF } from "jspdf";
-import { useLanguage } from "./context/LanguageContext";
+import { useLanguage } from "../context/LanguageContext";
+import DiscountModal from "../components/DiscountModal";
+import ManagerOverrideModal from "../components/ManagerOverrideModal";
 
 interface ReceiptData {
   orderId: string;
   items: CartItem[];
   subtotal: number;
+  discountAmount?: number;
   tax: number;
   total: number;
   paymentMethod: string;
@@ -102,6 +105,12 @@ const downloadPDFReceipt = (receipt: ReceiptData | null) => {
   doc.text(`Rs. ${receipt.subtotal.toFixed(2)}`, 75, y, { align: "right" });
   y += 3.5;
 
+  if (receipt.discountAmount && receipt.discountAmount > 0) {
+    doc.text("Discount:", 45, y, { align: "right" });
+    doc.text(`-Rs. ${receipt.discountAmount.toFixed(2)}`, 75, y, { align: "right" });
+    y += 3.5;
+  }
+
   doc.text("Tax (8.5%):", 45, y, { align: "right" });
   doc.text(`Rs. ${receipt.tax.toFixed(2)}`, 75, y, { align: "right" });
   y += 4.5;
@@ -188,6 +197,16 @@ export default function CheckoutPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState<boolean>(false);
   
+  // Discount States
+  const [discountType, setDiscountType] = useState<"percentage" | "fixed">("percentage");
+  const [discountValue, setDiscountValue] = useState<number>(0);
+  const [isDiscountModalOpen, setIsDiscountModalOpen] = useState<boolean>(false);
+
+  // Manager Override States
+  const [isOverrideModalOpen, setIsOverrideModalOpen] = useState<boolean>(false);
+  const [overrideActionLabel, setOverrideActionLabel] = useState<string>("");
+  const [onOverrideSuccess, setOnOverrideSuccess] = useState<() => void>(() => {});
+  
   // Suspended Sales state
   const [suspendedCarts, setSuspendedCarts] = useState<CartItem[][]>([]);
   
@@ -196,6 +215,7 @@ export default function CheckoutPage() {
     orderId: string;
     items: CartItem[];
     subtotal: number;
+    discountAmount?: number;
     tax: number;
     total: number;
     paymentMethod: string;
@@ -222,13 +242,25 @@ export default function CheckoutPage() {
     return cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   }, [cart]);
 
+  const discountAmount = useMemo(() => {
+    if (discountType === "percentage") {
+      return Number(((subtotal * discountValue) / 100).toFixed(2));
+    } else {
+      return Math.min(subtotal, discountValue);
+    }
+  }, [subtotal, discountType, discountValue]);
+
+  const taxableAmount = useMemo(() => {
+    return Math.max(0, subtotal - discountAmount);
+  }, [subtotal, discountAmount]);
+
   const tax = useMemo(() => {
-    return Number((subtotal * 0.085).toFixed(2));
-  }, [subtotal]);
+    return Number((taxableAmount * 0.085).toFixed(2));
+  }, [taxableAmount]);
 
   const total = useMemo(() => {
-    return Number((subtotal + tax).toFixed(2));
-  }, [subtotal, tax]);
+    return Number((taxableAmount + tax).toFixed(2));
+  }, [taxableAmount, tax]);
 
   // Handlers
   const handleAddToCart = (product: Product) => {
@@ -271,6 +303,30 @@ export default function CheckoutPage() {
     const product = products.find((p) => p.id === productId);
     if (!product) return;
 
+    const cartItem = cart.find((item) => item.product.id === productId);
+    if (!cartItem) return;
+
+    // Check if we are reducing quantity to 0 (which deletes the item)
+    if (delta < 0 && cartItem.quantity === 1) {
+      const role = localStorage.getItem("userRole");
+      if (role === "cashier") {
+        setOverrideActionLabel(language === "en" 
+          ? `Remove "${product.name}" from cart` 
+          : `"${product.name}" කරත්තයෙන් ඉවත් කිරීම`
+        );
+        setOnOverrideSuccess(() => () => executeUpdateQuantity(productId, delta));
+        setIsOverrideModalOpen(true);
+        return;
+      }
+    }
+
+    executeUpdateQuantity(productId, delta);
+  };
+
+  const executeUpdateQuantity = (productId: string, delta: number) => {
+    const product = products.find((p) => p.id === productId);
+    if (!product) return;
+
     setCart((prevCart) => {
       return prevCart
         .map((item) => {
@@ -296,7 +352,20 @@ export default function CheckoutPage() {
   };
 
   const handleClearCart = () => {
+    const role = localStorage.getItem("userRole");
+    if (role === "cashier") {
+      setOverrideActionLabel(language === "en" ? "Clear all cart items" : "කරත්තයේ සියලුම භාණ්ඩ ඉවත් කිරීම");
+      setOnOverrideSuccess(() => () => executeClearCart());
+      setIsOverrideModalOpen(true);
+      return;
+    }
+    executeClearCart();
+  };
+
+  const executeClearCart = () => {
     setCart([]);
+    setDiscountValue(0);
+    setDiscountType("percentage");
   };
 
   const handleCancelSale = () => {
@@ -306,14 +375,50 @@ export default function CheckoutPage() {
       : "වත්මන් විකිණීම අවලංගු කිරීමට අවශ්‍ය බව ස්ථිරද?";
 
     if (confirm(cancelMsg)) {
-      setCart([]);
+      const role = localStorage.getItem("userRole");
+      if (role === "cashier") {
+        setOverrideActionLabel(language === "en" ? "Cancel Current Sale" : "වත්මන් විකිණීම අවලංගු කිරීම");
+        setOnOverrideSuccess(() => () => executeClearCart());
+        setIsOverrideModalOpen(true);
+        return;
+      }
+      executeClearCart();
     }
+  };
+
+  const handleApplyDiscount = (type: "percentage" | "fixed", value: number) => {
+    setIsDiscountModalOpen(false);
+
+    const role = localStorage.getItem("userRole");
+    if (role === "cashier") {
+      const label = language === "en"
+        ? `Apply ${value}${type === "percentage" ? "%" : " Rs."} discount`
+        : `${value}${type === "percentage" ? "%" : " Rs."} ක වට්ටමක් යෙදීම`;
+      setOverrideActionLabel(label);
+      setOnOverrideSuccess(() => () => {
+        setDiscountType(type);
+        setDiscountValue(value);
+      });
+      setIsOverrideModalOpen(true);
+      return;
+    }
+
+    setDiscountType(type);
+    setDiscountValue(value);
+  };
+
+  const handleRemoveDiscount = () => {
+    setDiscountType("percentage");
+    setDiscountValue(0);
+    setIsDiscountModalOpen(false);
   };
 
   const handleSuspendSale = () => {
     if (cart.length === 0) return;
     setSuspendedCarts((prev) => [...prev, cart]);
     setCart([]);
+    setDiscountValue(0);
+    setDiscountType("percentage");
     alert(
       language === "en"
         ? "Sale suspended successfully."
@@ -334,11 +439,16 @@ export default function CheckoutPage() {
     }
     setCart(suspendedCarts[index]);
     setSuspendedCarts((prev) => prev.filter((_, idx) => idx !== index));
+    // Reset discount just in case when resuming a suspended sale
+    setDiscountValue(0);
+    setDiscountType("percentage");
   };
 
   const handleNewSale = () => {
     setCart([]);
     setCompletedReceipt(null);
+    setDiscountValue(0);
+    setDiscountType("percentage");
   };
 
   const handlePaymentComplete = async (paymentMethod: string, amountTendered: number) => {
@@ -408,6 +518,7 @@ export default function CheckoutPage() {
       orderId,
       items: [...cart],
       subtotal,
+      discountAmount,
       tax,
       total,
       paymentMethod,
@@ -417,6 +528,8 @@ export default function CheckoutPage() {
     });
 
     setCart([]);
+    setDiscountValue(0);
+    setDiscountType("percentage");
   };
 
   return (
@@ -460,6 +573,12 @@ export default function CheckoutPage() {
                   <span>{t("subtotal")}</span>
                   <span>Rs. {completedReceipt.subtotal.toFixed(2)}</span>
                 </div>
+                {completedReceipt.discountAmount !== undefined && completedReceipt.discountAmount > 0 && (
+                  <div className="flex justify-between text-error font-medium animate-fade-in">
+                    <span>{language === "en" ? "Discount" : "වට්ටම"}</span>
+                    <span>-Rs. {completedReceipt.discountAmount.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-on-surface-variant">
                   <span>{t("tax")}</span>
                   <span>Rs. {completedReceipt.tax.toFixed(2)}</span>
@@ -700,8 +819,25 @@ export default function CheckoutPage() {
               <div className="flex flex-col gap-2 mb-md">
                 <div className="flex justify-between items-center text-on-surface-variant font-body-md text-body-md">
                   <span>{t("subtotal")}</span>
-                  <span className="font-mono-data">Rs. {subtotal.toFixed(2)}</span>
+                  <div className="flex items-center gap-sm">
+                    <span className="font-mono-data">Rs. {subtotal.toFixed(2)}</span>
+                    {cart.length > 0 && (
+                      <button
+                        onClick={() => setIsDiscountModalOpen(true)}
+                        className="text-primary hover:text-primary-container text-xs cursor-pointer flex items-center gap-0.5 border border-primary/20 px-2.5 py-0.5 rounded-full hover:bg-primary/5 transition-all font-semibold font-label-sm"
+                      >
+                        <span className="material-symbols-outlined text-[12px]">sell</span>
+                        {discountValue > 0 ? (language === "en" ? "Edit" : "වෙනස් කරන්න") : (language === "en" ? "Add Discount" : "වට්ටමක් එක් කරන්න")}
+                      </button>
+                    )}
+                  </div>
                 </div>
+                {discountValue > 0 && (
+                  <div className="flex justify-between items-center text-error font-body-md text-body-md animate-fade-in">
+                    <span>{language === "en" ? "Discount" : "වට්ටම"} ({discountType === "percentage" ? `${discountValue}%` : `Rs. ${discountValue.toFixed(2)}`})</span>
+                    <span className="font-mono-data">-Rs. {discountAmount.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between items-center text-on-surface-variant font-body-md text-body-md">
                   <span>{t("tax")}</span>
                   <span className="font-mono-data">Rs. {tax.toFixed(2)}</span>
@@ -760,6 +896,24 @@ export default function CheckoutPage() {
         onClose={() => setIsPaymentModalOpen(false)}
         totalAmount={total}
         onComplete={handlePaymentComplete}
+      />
+
+      {/* Custom Discount Modal */}
+      <DiscountModal
+        isOpen={isDiscountModalOpen}
+        onClose={() => setIsDiscountModalOpen(false)}
+        onApply={handleApplyDiscount}
+        onRemove={handleRemoveDiscount}
+        currentDiscountType={discountType}
+        currentDiscountValue={discountValue}
+      />
+
+      {/* Manager PIN Override Keypad Modal */}
+      <ManagerOverrideModal
+        isOpen={isOverrideModalOpen}
+        onClose={() => setIsOverrideModalOpen(false)}
+        onAuthorized={onOverrideSuccess}
+        actionLabel={overrideActionLabel}
       />
     </Shell>
   );
