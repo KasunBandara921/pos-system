@@ -276,6 +276,17 @@ export default function PaymentModal({
                       ? "The external wallet terminal is online."
                       : "බාහිර ජංගම පසුම්බි පර්යන්තය සක්‍රීයයි.")}
               </p>
+              {paymentMethod === "Card" && (
+                <button
+                  type="button"
+                  onClick={() => onComplete("Card", totalAmount)}
+                  className="mt-xs text-xs font-semibold text-primary hover:text-primary-container px-sm py-1 border border-primary/30 rounded-full hover:bg-primary/5 transition-all flex items-center gap-xs cursor-pointer pointer-events-auto"
+                  title="Bypass PayHere popup and complete card sale instantly"
+                >
+                  <span className="material-symbols-outlined text-sm">construction</span>
+                  {language === "en" ? "Simulate Approved (Developer Bypass)" : "සාර්ථක ගෙවීමක් ලෙස අනුකරණය කරන්න (බයිපාස්)"}
+                </button>
+              )}
             </div>
           )}
         </div>
