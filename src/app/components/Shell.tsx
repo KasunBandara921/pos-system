@@ -34,6 +34,11 @@ export default function Shell({
   const [role, setRole] = React.useState<string | null>(null);
   const [isLocked, setIsLocked] = React.useState(false);
 
+  // Real-time Notifications states
+  const [notifications, setNotifications] = React.useState<any[]>([]);
+  const [activeToasts, setActiveToasts] = React.useState<any[]>([]);
+  const [showBellMenu, setShowBellMenu] = React.useState(false);
+
   React.useEffect(() => {
     // Read actual state of DOM HTML class set by layout script
     const isDark = document.documentElement.classList.contains("dark");
@@ -56,6 +61,59 @@ export default function Shell({
       setUserLabel(t("storeManager"));
     }
   }, [router, language, t]);
+
+  // Real-time event notifications listener (SSE EventSource)
+  React.useEffect(() => {
+    const eventSource = new EventSource("/api/notifications");
+
+    eventSource.onmessage = (event) => {
+      if (event.data === "connected") return;
+      try {
+        const data = JSON.parse(event.data);
+        const newId = Math.random().toString(36).substring(2, 9);
+        
+        const newNotif = {
+          id: newId,
+          productName: data.name,
+          sku: data.sku,
+          time: data.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          read: false
+        };
+
+        setNotifications((prev) => [newNotif, ...prev]);
+
+        // Add toast
+        const toastTitle = language === "en" ? "Out of Stock Warning" : "තොග නොමැත අවවාදය";
+        const toastText = language === "en"
+          ? `Product "${data.name}" (SKU: ${data.sku}) has reached 0 stock.`
+          : `"${data.name}" (SKU: ${data.sku}) භාණ්ඩයේ තොග අවසන් වී ඇත.`;
+
+        const newToast = { id: newId, title: toastTitle, message: toastText };
+        setActiveToasts((prev) => [...prev, newToast]);
+
+        // Auto dismiss after 5s
+        setTimeout(() => {
+          setActiveToasts((prev) => prev.filter((t) => t.id !== newId));
+        }, 5000);
+
+      } catch (err) {
+        console.error("Failed to parse stock notification event:", err);
+      }
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  }, [language]);
+
+  const handleClearNotifications = () => {
+    setNotifications([]);
+    setShowBellMenu(false);
+  };
+
+  const handleDismissToast = (id: string) => {
+    setActiveToasts((prev) => prev.filter((t) => t.id !== id));
+  };
 
   const handleUnlock = (user: SafeUser) => {
     localStorage.removeItem("isTerminalLocked");
@@ -254,7 +312,7 @@ export default function Shell({
           </div>
 
           {/* Trailing Actions */}
-          <div className="flex items-center gap-xs">
+          <div className="flex items-center gap-xs relative">
             <button
               onClick={() => setLanguage(language === "en" ? "si" : "en")}
               className="px-3 py-1 bg-surface-container-low border border-outline-variant rounded-2xl font-label-md text-label-md text-on-surface hover:bg-surface-container transition-all duration-200 min-h-10 min-w-14 flex items-center justify-center relative group glass-panel shadow-sm cursor-pointer font-semibold"
@@ -271,10 +329,68 @@ export default function Shell({
                 {theme === "dark" ? "light_mode" : "dark_mode"}
               </span>
             </button>
-            <button className="p-xs rounded-2xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all duration-200 relative min-w-10 min-h-10 flex items-center justify-center">
-              <span className="material-symbols-outlined text-[22px]">notifications</span>
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full ring-2 ring-surface"></span>
-            </button>
+            
+            {/* Dynamic Notification Bell Button & Menu */}
+            <div className="relative">
+              <button
+                onClick={() => setShowBellMenu(!showBellMenu)}
+                className="p-xs rounded-2xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all duration-200 relative min-w-10 min-h-10 flex items-center justify-center cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[22px]">notifications</span>
+                {notifications.length > 0 && (
+                  <span className="absolute top-1 right-1 bg-error text-white font-mono text-[9px] w-4.5 h-4.5 rounded-full flex items-center justify-center font-bold ring-2 ring-surface animate-pulse">
+                    {notifications.length}
+                  </span>
+                )}
+              </button>
+              
+              {showBellMenu && (
+                <div className="absolute right-0 top-12 w-80 bg-surface border border-outline-variant/60 rounded-3xl shadow-[0_16px_40px_rgba(15,23,42,0.12)] p-md flex flex-col gap-sm z-50 animate-rise-in text-on-surface">
+                  <div className="flex justify-between items-center border-b border-outline-variant/30 pb-xs">
+                    <span className="font-label-md text-label-md font-bold flex items-center gap-xs">
+                      <span className="material-symbols-outlined text-primary text-[18px]">notifications</span>
+                      {language === "en" ? "Notifications" : "දැනුම්දීම්"}
+                    </span>
+                    {notifications.length > 0 && (
+                      <button
+                        onClick={handleClearNotifications}
+                        className="text-primary hover:text-primary-container text-xs cursor-pointer font-semibold font-label-sm"
+                      >
+                        {language === "en" ? "Clear All" : "සියල්ල ඉවත් කරන්න"}
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-xs max-h-60 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="py-md text-center text-on-surface-variant/60 flex flex-col items-center justify-center gap-xs">
+                        <span className="material-symbols-outlined text-3xl">notifications_off</span>
+                        <p className="font-label-sm text-label-sm">
+                          {language === "en" ? "No new alerts." : "නව අනතුරු ඇඟවීම් නැත."}
+                        </p>
+                      </div>
+                    ) : (
+                      notifications.map((n) => (
+                        <div
+                          key={n.id}
+                          className="p-sm bg-surface-container-low rounded-2xl border border-outline-variant/40 flex items-start gap-xs text-xs"
+                        >
+                          <span className="material-symbols-outlined text-error shrink-0 text-sm mt-0.5 font-bold">warning</span>
+                          <div className="flex-1">
+                            <p className="font-semibold text-on-surface leading-snug">
+                              {language === "en" ? `Out of stock: ${n.productName}` : `තොග අවසන්: ${n.productName}`}
+                            </p>
+                            <p className="text-[10px] text-on-surface-variant/80 mt-0.5">
+                              SKU: {n.sku} • {n.time}
+                            </p>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <button className="p-xs rounded-2xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all duration-200 min-w-10 min-h-10 flex items-center justify-center">
               <span className="material-symbols-outlined text-[22px]">help</span>
             </button>
@@ -304,6 +420,44 @@ export default function Shell({
           {children}
         </div>
       </div>
+
+      {/* Sliding Toasts Container */}
+      <div className="fixed top-22 right-4 z-50 flex flex-col gap-sm w-full max-w-96 pointer-events-none">
+        {activeToasts.map((t) => (
+          <div
+            key={t.id}
+            className="pointer-events-auto bg-surface border-l-4 border-error text-on-surface card-elevated p-md rounded-2xl flex items-start gap-sm animate-slide-in-right shadow-[0_16px_40px_rgba(239,68,68,0.12)] border border-outline-variant/60"
+          >
+            <div className="w-8 h-8 rounded-xl bg-error/15 flex items-center justify-center text-error shrink-0">
+              <span className="material-symbols-outlined text-[20px] fill">warning</span>
+            </div>
+            <div className="flex-1">
+              <h4 className="font-label-md text-label-md font-bold text-on-surface leading-tight">
+                {t.title}
+              </h4>
+              <p className="text-xs text-on-surface-variant mt-1 leading-relaxed">
+                {t.message}
+              </p>
+            </div>
+            <button
+              onClick={() => handleDismissToast(t.id)}
+              className="text-on-surface-variant hover:text-on-surface p-0.5 rounded-full hover:bg-surface-container transition-colors cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[16px]">close</span>
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes slideInRight {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        .animate-slide-in-right {
+          animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+      `}} />
 
       {/* Numerical lock screen overlay */}
       <LockScreen
