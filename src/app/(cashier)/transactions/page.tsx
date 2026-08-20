@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import Shell from "../components/Shell";
-import { getTransactions } from "../actions/transactions";
-import type { TransactionRecord } from "../types";
-import { useLanguage } from "../context/LanguageContext";
+import Shell from "../../components/Shell";
+import { getTransactions } from "../../actions/transactions";
+import type { TransactionRecord } from "../../types";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function TransactionsPage() {
   const { t } = useLanguage();

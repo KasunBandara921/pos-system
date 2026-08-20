@@ -29,6 +29,7 @@ export default function Shell({
   // Dark/Light Mode Theme State
   const [theme, setTheme] = React.useState<"light" | "dark">("light");
   const [userLabel, setUserLabel] = React.useState("Store Manager");
+  const [role, setRole] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     // Read actual state of DOM HTML class set by layout script
@@ -41,10 +42,11 @@ export default function Shell({
       router.push("/login");
     }
 
-    const role = localStorage.getItem("userRole");
-    if (role === "cashier") {
+    const savedRole = localStorage.getItem("userRole");
+    setRole(savedRole);
+    if (savedRole === "cashier") {
       setUserLabel(t("storeCashier"));
-    } else if (role === "manager") {
+    } else if (savedRole === "manager") {
       setUserLabel(t("storeManager"));
     }
   }, [router, language, t]);
@@ -82,7 +84,12 @@ export default function Shell({
     { href: "/inventory", label: t("navInventory"), icon: "inventory_2" },
     { href: "/reports", label: t("navReports"), icon: "bar_chart" },
     { href: "/transactions", label: t("navTransactions"), icon: "receipt_long" },
-  ];
+  ].filter((link) => {
+    if (role === "cashier" && (link.href === "/inventory" || link.href === "/reports")) {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <div className="h-screen w-full overflow-hidden flex text-on-background">

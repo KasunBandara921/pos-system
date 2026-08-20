@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import Shell from "../components/Shell";
-import { getTransactions } from "../actions/transactions";
-import type { TransactionRecord, TransactionItem } from "../types";
-import { useLanguage } from "../context/LanguageContext";
+import Shell from "../../components/Shell";
+import { getTransactions } from "../../actions/transactions";
+import type { TransactionRecord, TransactionItem } from "../../types";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function ReportsPage() {
   const { t } = useLanguage();
