@@ -492,6 +492,8 @@ export default function CheckoutPage() {
 
     const orderId = `LWD-${Math.floor(100000 + Math.random() * 900000)}`;
     const changeDue = paymentMethod === "Cash" ? Math.max(0, amountTendered - total) : 0;
+    const activeUserId = localStorage.getItem("userId") || undefined;
+    const activeCashierName = localStorage.getItem("userName") || "System";
 
     try {
       await createTransaction({
@@ -503,6 +505,8 @@ export default function CheckoutPage() {
         paymentMethod,
         amountTendered,
         changeDue,
+        userId: activeUserId,
+        cashierName: activeCashierName,
       });
     } catch (error) {
       console.error("Failed to save transaction:", error);

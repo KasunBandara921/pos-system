@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "../context/LanguageContext";
+import { seedUsers, loginWithCredentials } from "../actions/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -22,6 +23,9 @@ export default function LoginPage() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
+    // Run DB self-seeding
+    seedUsers();
+
     // Read theme from html node class list
     const isDark = document.documentElement.classList.contains("dark");
     setTheme(isDark ? "dark" : "light");
@@ -40,30 +44,44 @@ export default function LoginPage() {
     }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsSubmitting(true);
 
-    // Simple mock authorization logic
-    setTimeout(() => {
-      const isValidAdmin = username.toLowerCase() === "admin" && password === "admin123";
-      const isValidCashier = username.toLowerCase() === "cashier" && password === "cashier123";
+    try {
+      const res = await loginWithCredentials(username, password);
+      
+      if (res.success && res.user) {
+        // Enforce role consistency with the UI selector choice
+        if (res.user.role !== role) {
+          setError(
+            language === "en"
+              ? `Account exists but role is not "${role}". Select the correct role above.`
+              : `ගිණුම පවතී නමුත් භූමිකාව "${role}" නොවේ. ඉහතින් නිවැරදි භූමිකාව තෝරන්න.`
+          );
+          setIsSubmitting(false);
+          return;
+        }
 
-      if (isValidAdmin || isValidCashier) {
         localStorage.setItem("isLoggedIn", "true");
-        localStorage.setItem("userRole", role);
-        localStorage.setItem("userName", username);
+        localStorage.setItem("userRole", res.user.role);
+        localStorage.setItem("userName", res.user.name);
+        localStorage.setItem("userId", res.user.id);
+        
         router.push("/");
       } else {
         setError(
           language === "en"
-            ? "Invalid username or password. Use hints: admin/admin123 or cashier/cashier123"
-            : "වැරදි පරිශීලක නාමයක් හෝ මුරපදයක්. ඉඟි භාවිතා කරන්න: admin/admin123 හෝ cashier/cashier123"
+            ? res.error || "Invalid username or password. Hints: admin/admin123 or cashier/cashier123"
+            : "වැරදි පරිශීලක නාමයක් හෝ මුරපදයක්. ඉඟි: admin/admin123 හෝ cashier/cashier123"
         );
         setIsSubmitting(false);
       }
-    }, 800); // Slight delay for realistic authentication animation
+    } catch (err) {
+      setError("System authentication error.");
+      setIsSubmitting(false);
+    }
   };
 
   return (

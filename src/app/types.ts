@@ -35,5 +35,7 @@ export interface TransactionRecord {
   paymentMethod: string;
   amountTendered: number;
   changeDue: number;
+  userId?: string;
+  cashierName?: string;
   createdAt: string;
 }

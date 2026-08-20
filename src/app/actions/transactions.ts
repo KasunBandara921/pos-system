@@ -12,6 +12,8 @@ type CreateTransactionInput = {
   paymentMethod: string;
   amountTendered: number;
   changeDue: number;
+  userId?: string;
+  cashierName?: string;
 };
 
 export async function createTransaction(input: CreateTransactionInput): Promise<TransactionRecord> {
@@ -26,6 +28,8 @@ export async function createTransaction(input: CreateTransactionInput): Promise<
       paymentMethod: input.paymentMethod,
       amountTendered: input.amountTendered,
       changeDue: input.changeDue,
+      userId: input.userId,
+      cashierName: input.cashierName,
     },
   });
 
@@ -39,6 +43,8 @@ export async function createTransaction(input: CreateTransactionInput): Promise<
     paymentMethod: transaction.paymentMethod,
     amountTendered: transaction.amountTendered,
     changeDue: transaction.changeDue,
+    userId: transaction.userId || undefined,
+    cashierName: transaction.cashierName || undefined,
     createdAt: transaction.createdAt.toISOString(),
   };
 }
