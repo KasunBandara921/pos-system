@@ -166,8 +166,9 @@ export default function Shell({
     { href: "/reports", label: t("navReports"), icon: "bar_chart" },
     { href: "/users", label: t("navUsers"), icon: "group" },
     { href: "/transactions", label: t("navTransactions"), icon: "receipt_long" },
+    { href: "/advice", label: t("navAdvice"), icon: "psychology" },
   ].filter((link) => {
-    if (role === "cashier" && (link.href === "/inventory" || link.href === "/reports" || link.href === "/users")) {
+    if (role === "cashier" && (link.href === "/inventory" || link.href === "/reports" || link.href === "/users" || link.href === "/advice")) {
       return false;
     }
     return true;

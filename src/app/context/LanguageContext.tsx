@@ -39,6 +39,7 @@ const translations: Record<Language, Record<string, string>> = {
     navReports: "Reports",
     navTransactions: "Transactions",
     navUsers: "Cashiers",
+    navAdvice: "AI Advice",
 
     // Login Page
     loginTitle: "Lewdeniya Stores",
@@ -160,6 +161,7 @@ const translations: Record<Language, Record<string, string>> = {
     navReports: "වාර්තා",
     navTransactions: "ගනුදෙනු ඉතිහාසය",
     navUsers: "කැෂියර්වරුන්",
+    navAdvice: "AI උපදෙස්",
 
     // Login Page
     loginTitle: "ලෙව්දෙනිය ස්ටෝර්ස්",
